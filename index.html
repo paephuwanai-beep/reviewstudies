@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSH Clinical Case Review & Debate</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts: Kanit -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- Navbar -->
+    <nav class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-cyan-600 text-white p-2 rounded-xl shadow-lg">
+                    <i class="fa-solid fa-heart-pulse text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-cyan-400">KSH Case Review & Debate</h1>
+                    <p class="text-xs text-slate-400">ระบบทบทวนกรณีศึกษาและวิเคราะห์ทางคลินิก (Dead & Refer in 24h)</p>
+                </div>
+            </div>
+            <button onclick="openNewCaseModal()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-lg flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>บันทึกเคสใหม่</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+
+        <!-- Module Tabs -->
+        <div class="flex space-x-2 border-b border-slate-800 pb-4 mb-6 overflow-x-auto">
+            <button onclick="switchTab('Dead')" id="tab-Dead" class="px-5 py-2.5 rounded-xl font-medium text-sm transition bg-cyan-600 text-white shadow-md flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-skull text-slate-900"></i>
+                <span>Mortality Review (ผู้ป่วยเสียชีวิต)</span>
+            </button>
+            <button onclick="switchTab('Refer')" id="tab-Refer" class="px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-ambulance text-orange-400"></i>
+                <span>Refer in 24 ชม. (ส่งต่อฉุกเฉิน)</span>
+            </button>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="bg-slate-800/50 backdrop-blur border border-slate-700/60 p-4 rounded-2xl mb-6 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative w-full md:w-96">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                    <i class="fa-solid fa-search"></i>
+                </span>
+                <input type="text" id="searchInput" oninput="filterCases()" placeholder="ค้นหาด้วย HN, AN หรือ Diagnosis..." class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+            </div>
+            <div class="text-xs text-slate-400" id="caseCount">กำลังโหลดข้อมูล...</div>
+        </div>
+
+        <!-- Cases Grid -->
+        <div id="caseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Cards Loaded Here -->
+        </div>
+
+    </main>
+
+    <!-- Case Detail & Debate Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4 overflow-y-auto">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-4xl rounded-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-4 bg-slate-900 border-b border-slate-700 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-lg font-bold text-cyan-400">รายละเอียดกรณีศึกษา</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl px-2">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1" id="modalContent">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Application Logic -->
+    <script>
+        // แทนที่ URL นี้ด้วย Web App URL ของ Google Apps Script ที่ท่าน Deploy แล้ว
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzjTz52GLf8rMtXT0rVPg58biSnNxa8yEHkHujivmBKnbE_M6KS8_9jrG4LfY7215LJ/exec";
+
+        let currentModule = 'Dead';
+        let allCases = [];
+
+        async function fetchCases() {
+            try {
+                // ตัวอย่างจำลองข้อมูล ถ้ายังไม่ได้ใส่ Apps Script URL จริง
+                if(WEB_APP_URL.includes("YOUR_")) {
+                    allCases = getMockData();
+                } else {
+                    let res = await fetch(`${WEB_APP_URL}?action=getCases`);
+                    allCases = await res.json();
+                }
+                renderCases();
+            } catch (err) {
+                console.error(err);
+                allCases = getMockData();
+                renderCases();
+            }
+        }
+
+        function switchTab(module) {
+            currentModule = module;
+            if(module === 'Dead') {
+                document.getElementById('tab-Dead').className = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-cyan-600 text-white shadow-md flex items-center space-x-2 shrink-0";
+                document.getElementById('tab-Refer').className = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center space-x-2 shrink-0";
+            } else {
+                document.getElementById('tab-Refer').className = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-orange-600 text-white shadow-md flex items-center space-x-2 shrink-0";
+                document.getElementById('tab-Dead').className = "px-5 py-2.5 rounded-xl font-medium text-sm transition bg-slate-800 text-slate-400 hover:bg-slate-700 flex items-center space-x-2 shrink-0";
+            }
+            renderCases();
+        }
+
+        function renderCases() {
+            const grid = document.getElementById('caseGrid');
+            const keyword = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = allCases.filter(c => c.module_type === currentModule && 
+                (c.hn.toLowerCase().includes(keyword) || c.an.toLowerCase().includes(keyword) || c.primary_diagnosis.toLowerCase().includes(keyword))
+            );
+
+            document.getElementById('caseCount').innerText = `พบทั้งหมด ${filtered.length} เคส`;
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500">ไม่พบข้อมูลในโมดูลนี้</div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(c => `
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-5 hover:border-cyan-500 transition shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-semibold px-2.5 py-1 rounded-lg ${c.module_type === 'Dead' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-orange-500/20 text-orange-400 border border-orange-500/30'}">
+                                ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต' : 'Refer in 24 ชม.'}
+                            </span>
+                            <span class="text-xs text-slate-400">${c.department}</span>
+                        </div>
+                        <div class="text-sm font-bold text-slate-200 mb-1">HN: ${c.hn} | AN: ${c.an}</div>
+                        <p class="text-xs text-cyan-300 mb-3 font-medium">Dx: ${c.primary_diagnosis}</p>
+                        <p class="text-xs text-slate-400 line-clamp-2 mb-4">ผู้ทบทวน: ${c.reviewer_name} (${c.review_date})</p>
+                    </div>
+                    <button onclick="openDetail('${c.case_id}')" class="w-full bg-slate-700 hover:bg-cyan-600 hover:text-white text-slate-200 py-2 rounded-xl text-xs font-medium transition flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-comments"></i>
+                        <span>เปิดทบทวนและ Debate เคส</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function openDetail(caseId) {
+            const c = allCases.find(item => item.case_id === caseId);
+            if(!c) return;
+
+            document.getElementById('modalTitle').innerText = `รายละเอียดเคส HN: ${c.hn} (AN: ${c.an})`;
+            document.getElementById('modalContent').innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                        <h4 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">ข้อมูลเบื้องต้น</h4>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+                            <div><strong>Admit:</strong> ${c.admit_datetime}</div>
+                            <div><strong>Discharge:</strong> ${c.discharge_datetime}</div>
+                            <div class="col-span-2"><strong>Diagnosis:</strong> ${c.primary_diagnosis}</div>
+                            <div class="col-span-2"><strong>ภาวะแทรกซ้อน:</strong> ${c.complications}</div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">จุดแข็ง / สิ่งที่ทำได้ดี</h4>
+                        <p class="text-xs text-slate-300">${c.strengths}</p>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                        <h4 class="text-xs font-bold text-rose-400 uppercase tracking-wider mb-2">จุดอ่อน / สิ่งที่ควรพัฒนา</h4>
+                        <p class="text-xs text-slate-300">${c.weaknesses}</p>
+                    </div>
+                    <div class="text-center pt-2">
+                        <a href="${c.sheet_url || '#'}" target="_blank" class="text-xs text-cyan-400 hover:underline">
+                            <i class="fa-solid fa-external-link-alt"></i> เปิดดูบันทึกต้นฉบับใน Google Sheet
+                        </a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function openNewCaseModal() {
+            alert("ฟอร์มบันทึกเคสใหม่เชื่อมต่อกับ Google Apps Script / Google Sheets สามารถบันทึกข้อมูลผ่านหน้าเว็บนี้ได้ทันทีหลังจากผูก Web App URL สมบูรณ์");
+        }
+
+        function getMockData() {
+            return [
+                {
+                    case_id: "CASE-001",
+                    module_type: "Dead",
+                    hn: "0064156",
+                    an: "690003863",
+                    admit_datetime: "26/10/69 20.10 น.",
+                    discharge_datetime: "30 ม.ค.2569 เวลา 13.32 น.",
+                    department: "IPD ชาย",
+                    primary_diagnosis: "#obstructive Jx DDX CHCA c #liver cirrhosis DDX alcohol",
+                    complications: "Sepsis / Hypoglycemia",
+                    reviewer_name: "ปราณี ตราเงิน พยาบาลวิชาชีพ",
+                    review_date: "4/11/2569",
+                    strengths: "ดูแลแบบประคับประคองอย่างเต็มที่ตามความต้องการของผู้ป่วยและญาติ",
+                    weaknesses: "-"
+                },
+                {
+                    case_id: "CASE-002",
+                    module_type: "Refer",
+                    hn: "0058921",
+                    an: "690002140",
+                    admit_datetime: "12/03/69 10.00 น.",
+                    discharge_datetime: "12/03/69 16.30 น.",
+                    department: "ER / IPD",
+                    primary_diagnosis: "STEMI with Cardiogenic Shock",
+                    complications: "Cardiac Arrest",
+                    reviewer_name: "ทีม PCT ER",
+                    review_date: "13/03/2569",
+                    strengths: "ECG รวดเร็วและประสานส่งต่อรวดเร็วใน 30 นาที",
+                    weaknesses: "การสื่อสารเวรส่งต่อบางจุดควรชัดเจนขึ้น"
+                }
+            ];
+        }
+
+        // โหลดข้อมูลเริ่มต้นเมื่อเปิดเว็บ
+        fetchCases();
+    </script>
+</body>
+</html>

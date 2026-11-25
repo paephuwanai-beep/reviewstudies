@@ -3,175 +3,392 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Debate KSH study - ระบบทบทวนกรณีศึกษาทางคลินิก</title>
+    <title>KS study studios - ระบบทบทวนกรณีศึกษาทางคลินิก</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Fonts: Sarabun -->
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Sarabun & Plus Jakarta Sans -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Sarabun', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { font-family: 'Sarabun', sans-serif; font-size: 17px; }
+        body {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 16px;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .glass-card-inner {
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.65);
+        }
+
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-right: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.75);
+        }
+
+        /* Animated Background Mesh Orbs */
+        @keyframes floatSlow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -25px) scale(1.06); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-25px, 20px) scale(0.96); }
+        }
+        .orb-1 { animation: floatSlow 14s ease-in-out infinite; }
+        .orb-2 { animation: floatReverse 18s ease-in-out infinite; }
+
+        /* Highlight Pulse when jumping from Mapping Group */
+        @keyframes highlightTarget {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7); border-color: #06b6d4; }
+            50% { box-shadow: 0 0 0 12px rgba(6, 182, 212, 0); border-color: #0284c7; }
+            100% { box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07); }
+        }
+        .highlight-pulse {
+            animation: highlightTarget 1.8s ease-out;
+        }
+
+        /* Mapping Connector Line */
+        .mapping-branch {
+            position: relative;
+        }
+        .mapping-branch::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 22px;
+            width: 14px;
+            height: 2px;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.5); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100, 116, 139, 0.7); }
+
         @media print {
-            aside, header, .no-print { display: none !important; }
-            main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+            aside, header, .no-print, .bg-orb { display: none !important; }
+            body { background: #ffffff !important; }
+            main { padding: 0 !important; margin: 0 !important; width: 100% !important; overflow: visible !important; }
+            .glass-panel, .glass-card-inner {
+                background: #ffffff !important;
+                backdrop-filter: none !important;
+                border: 1px solid #cbd5e1 !important;
+                box-shadow: none !important;
+            }
             .print-full { width: 100% !important; max-width: 100% !important; }
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col md:flex-row">
+<body class="bg-gradient-to-br from-sky-100 via-indigo-50 to-emerald-50 text-slate-800 min-h-screen flex flex-col md:flex-row relative selection:bg-cyan-500 selection:text-white">
+
+    <!-- Decorative Ambient Glass Orbs -->
+    <div class="bg-orb fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="orb-1 absolute -top-24 -left-20 w-96 h-96 rounded-full bg-cyan-300/35 blur-3xl"></div>
+        <div class="orb-2 absolute top-1/3 right-10 w-[28rem] h-[28rem] rounded-full bg-indigo-300/30 blur-3xl"></div>
+        <div class="orb-1 absolute -bottom-24 left-1/3 w-96 h-96 rounded-full bg-emerald-300/30 blur-3xl"></div>
+    </div>
+
+    <!-- Custom Toast Notification (No alert() used) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none no-print"></div>
 
     <!-- Sidebar Navigation -->
-    <aside class="w-full md:w-72 bg-slate-900 text-slate-100 flex flex-col justify-between shrink-0 shadow-lg no-print">
+    <aside class="w-full md:w-72 glass-sidebar text-slate-100 flex flex-col justify-between shrink-0 shadow-2xl z-20 no-print">
         <div>
-            <!-- Brand Logo -->
-            <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
-                <div class="bg-blue-600 text-white p-3 rounded-2xl shadow-md">
-                    <i class="fa-solid fa-stethoscope text-2xl"></i>
+            <!-- Brand Logo: KS study studios -->
+            <div class="p-5 border-b border-white/10 flex items-center space-x-3.5">
+                <div class="relative group">
+                    <div class="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-2xl blur opacity-60 group-hover:opacity-90 transition"></div>
+                    <div class="relative bg-slate-900 border border-white/20 text-cyan-300 p-3 rounded-2xl shadow-inner flex items-center justify-center">
+                        <i class="fa-solid fa-layer-group text-xl"></i>
+                    </div>
                 </div>
                 <div>
-                    <h1 class="text-lg font-bold text-cyan-400 leading-tight">The Debate KSH study</h1>
-                    <p class="text-xs text-slate-400">ทีม PCT โรงพยาบาลคอนสาร</p>
+                    <h1 class="font-display text-lg font-extrabold bg-gradient-to-r from-cyan-300 via-sky-200 to-indigo-300 bg-clip-text text-transparent leading-tight tracking-tight">
+                        KS study studios
+                    </h1>
+                    <p class="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        ทีม PCT โรงพยาบาลคอนสาร
+                    </p>
                 </div>
             </div>
 
             <!-- Menu -->
             <div class="p-4 space-y-5">
-                <button onclick="openNewCaseModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-2.5 px-4 rounded-xl font-semibold text-base transition shadow-md flex items-center justify-center space-x-2 cursor-pointer">
+                <button onclick="openNewCaseModal()" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white py-2.5 px-4 rounded-2xl font-semibold text-sm transition-all shadow-lg shadow-emerald-950/40 border border-white/20 flex items-center justify-center space-x-2 cursor-pointer active:scale-[0.98]">
                     <i class="fa-solid fa-file-medical"></i>
                     <span>+ บันทึกกรณีศึกษาใหม่</span>
                 </button>
 
                 <!-- Dead Category -->
-                <div class="space-y-1">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 pb-1 flex items-center space-x-2">
-                        <i class="fa-solid fa-skull text-rose-400"></i>
+                <div class="space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 pb-1 flex items-center space-x-2">
+                        <i class="fa-solid fa-heart-pulse text-rose-400"></i>
                         <span>1. Mortality Review (Dead)</span>
                     </div>
-                    <div class="pl-2 space-y-1 border-l-2 border-slate-800 ml-2">
-                        <button onclick="selectMenu('Dead', 'ทั้งหมด')" id="menu-Dead-ทั้งหมด" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium transition bg-blue-600 text-white flex justify-between items-center cursor-pointer">
+                    <div class="pl-2 space-y-1 border-l border-white/15 ml-2">
+                        <button onclick="selectMenu('Dead', 'ทั้งหมด')" id="menu-Dead-ทั้งหมด" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium transition bg-gradient-to-r from-cyan-500/80 to-blue-600/80 text-white border border-white/20 flex justify-between items-center cursor-pointer shadow-md">
                             <span>รวมทั้งหมด (Dead)</span>
-                            <span class="bg-blue-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-ทั้งหมด">0</span>
+                            <span class="bg-slate-950/40 text-xs px-2 py-0.5 rounded-full" id="count-Dead-ทั้งหมด">0</span>
                         </button>
-                        <button onclick="selectMenu('Dead', 'IPDหญิง')" id="menu-Dead-IPDหญิง" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Dead', 'IPDหญิง')" id="menu-Dead-IPDหญิง" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>IPD หญิง</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-IPDหญิง">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Dead-IPDหญิง">0</span>
                         </button>
-                        <button onclick="selectMenu('Dead', 'IPDชาย')" id="menu-Dead-IPDชาย" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Dead', 'IPDชาย')" id="menu-Dead-IPDชาย" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>IPD ชาย</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-IPDชาย">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Dead-IPDชาย">0</span>
                         </button>
-                        <button onclick="selectMenu('Dead', 'ER')" id="menu-Dead-ER" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Dead', 'ER')" id="menu-Dead-ER" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>ER (ห้องฉุกเฉิน)</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-ER">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Dead-ER">0</span>
                         </button>
-                        <button onclick="selectMenu('Dead', 'LR')" id="menu-Dead-LR" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Dead', 'LR')" id="menu-Dead-LR" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>LR (ห้องคลอด)</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-LR">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Dead-LR">0</span>
                         </button>
-                        <button onclick="selectMenu('Dead', 'อื่นๆ')" id="menu-Dead-อื่นๆ" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Dead', 'อื่นๆ')" id="menu-Dead-อื่นๆ" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>อื่นๆ</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Dead-อื่นๆ">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Dead-อื่นๆ">0</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Refer Category -->
-                <div class="space-y-1">
-                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 px-3 pb-1 flex items-center space-x-2">
-                        <i class="fa-solid fa-ambulance text-amber-400"></i>
+                <div class="space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 px-3 pb-1 flex items-center space-x-2">
+                        <i class="fa-solid fa-truck-medical text-amber-400"></i>
                         <span>2. Refer in 24 ชม.</span>
                     </div>
-                    <div class="pl-2 space-y-1 border-l-2 border-slate-800 ml-2">
-                        <button onclick="selectMenu('Refer', 'ทั้งหมด')" id="menu-Refer-ทั้งหมด" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                    <div class="pl-2 space-y-1 border-l border-white/15 ml-2">
+                        <button onclick="selectMenu('Refer', 'ทั้งหมด')" id="menu-Refer-ทั้งหมด" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>รวมทั้งหมด (Refer)</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-ทั้งหมด">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-ทั้งหมด">0</span>
                         </button>
-                        <button onclick="selectMenu('Refer', 'IPDหญิง')" id="menu-Refer-IPDหญิง" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Refer', 'IPDหญิง')" id="menu-Refer-IPDหญิง" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>IPD หญิง</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-IPDหญิง">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-IPDหญิง">0</span>
                         </button>
-                        <button onclick="selectMenu('Refer', 'IPDชาย')" id="menu-Refer-IPDชาย" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Refer', 'IPDชาย')" id="menu-Refer-IPDชาย" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>IPD ชาย</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-IPDชาย">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-IPDชาย">0</span>
                         </button>
-                        <button onclick="selectMenu('Refer', 'ER')" id="menu-Refer-ER" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Refer', 'ER')" id="menu-Refer-ER" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>ER (ห้องฉุกเฉิน)</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-ER">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-ER">0</span>
                         </button>
-                        <button onclick="selectMenu('Refer', 'LR')" id="menu-Refer-LR" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Refer', 'LR')" id="menu-Refer-LR" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>LR (ห้องคลอด)</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-LR">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-LR">0</span>
                         </button>
-                        <button onclick="selectMenu('Refer', 'อื่นๆ')" id="menu-Refer-อื่นๆ" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer">
+                        <button onclick="selectMenu('Refer', 'อื่นๆ')" id="menu-Refer-อื่นๆ" class="w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition">
                             <span>อื่นๆ</span>
-                            <span class="bg-slate-800 text-xs px-2 py-0.5 rounded-full" id="count-Refer-อื่นๆ">0</span>
+                            <span class="bg-white/10 text-xs px-2 py-0.5 rounded-full" id="count-Refer-อื่นๆ">0</span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="p-4 border-t border-slate-800 text-xs text-slate-400 text-center">
-            รพ.คอนสาร จ.ชัยภูมิ &copy; 2026
+        <div class="p-4 border-t border-white/10 text-xs text-slate-400 text-center">
+            <div class="font-semibold text-slate-300">KS study studios</div>
+            <div class="text-[11px] opacity-75">รพ.คอนสาร จ.ชัยภูมิ &copy; 2026</div>
         </div>
     </aside>
 
     <!-- Main View Area -->
-    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+    <main class="flex-1 flex flex-col min-w-0 overflow-y-auto z-10">
         
-        <!-- Header -->
-        <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-30 shadow-xs no-print">
+        <!-- Glass Header -->
+        <header class="glass-header px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4 sticky top-0 z-30 shadow-sm no-print">
             <div>
-                <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-900">Mortality Review: รวมทั้งหมด</h2>
-                <p class="text-xs text-slate-500">ระบบทบทวนกรณีศึกษาและวิเคราะห์สาเหตุเชิงลึก (RCA Debate MAP)</p>
+                <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-700 border border-indigo-200">
+                        CLINICAL GOVERNANCE
+                    </span>
+                    <h2 id="currentCategoryTitle" class="text-xl font-bold text-slate-900">Mortality Review: รวมทั้งหมด</h2>
+                </div>
+                <p class="text-xs text-slate-600 mt-0.5">ระบบทบทวนกรณีศึกษาทางคลินิก &amp; Point-by-Point RCA Debate Mapping</p>
             </div>
             
             <div class="relative w-full md:w-80">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-500">
                     <i class="fa-solid fa-magnifying-glass"></i>
                 </span>
-                <input type="text" id="searchInput" oninput="renderCases()" placeholder="ค้นหา HN, AN หรือ Dx..." class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" id="searchInput" oninput="renderCases()" placeholder="ค้นหา HN, AN หรือ Dx..." class="w-full bg-white/75 backdrop-blur-md border border-white/80 rounded-2xl pl-10 pr-4 py-2 text-sm shadow-inner focus:outline-none focus:ring-2 focus:ring-cyan-500 transition">
             </div>
         </header>
 
         <!-- Dynamic Content View -->
-        <div class="p-6 flex-1" id="mainContainer">
-            <!-- Grid list view OR Fullpage Debate View loaded here -->
+        <div class="p-4 md:p-6 flex-1" id="mainContainer">
+            <!-- Grid list view -->
             <div id="caseGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            <!-- Fullpage Debate & Mapping View -->
             <div id="fullpageDebateView" class="hidden"></div>
         </div>
     </main>
 
+    <!-- Point Comment Modal / Quick Pin Composer -->
+    <div id="pointCommentModal" class="fixed inset-0 bg-slate-950/55 backdrop-blur-md z-50 hidden flex justify-center items-center p-4 no-print">
+        <div class="bg-white/90 backdrop-blur-2xl border border-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden transform transition-all">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] uppercase tracking-wider text-cyan-300 font-bold block">ปักหมุดแสดงความเห็นเฉพาะจุด</span>
+                        <h3 id="pinModalNodeTitle" class="text-base font-bold leading-snug">หัวข้อจุดอภิปราย</h3>
+                    </div>
+                </div>
+                <button onclick="closePointModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center cursor-pointer transition">&times;</button>
+            </div>
+
+            <form onsubmit="handlePointCommentSubmit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="pin_node_id">
+                <input type="hidden" id="pin_node_label">
+                <input type="hidden" id="pin_node_category">
+
+                <!-- Comment Type Selector Pills -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">ประเภทประเด็น (Point Tag)</label>
+                    <div class="grid grid-cols-2 gap-2" id="pointTypeSelector">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="point_type" value="suggestion" checked class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 bg-white/70 peer-checked:bg-cyan-50 peer-checked:border-cyan-500 peer-checked:text-cyan-800 text-xs font-bold flex items-center gap-2 transition">
+                                <span>💡</span> <span>ข้อเสนอแนะ / แนวทาง</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="point_type" value="risk" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 bg-white/70 peer-checked:bg-amber-50 peer-checked:border-amber-500 peer-checked:text-amber-800 text-xs font-bold flex items-center gap-2 transition">
+                                <span>⚠️</span> <span>จุดเสี่ยง / ข้อสังเกต</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="point_type" value="strength" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 bg-white/70 peer-checked:bg-emerald-50 peer-checked:border-emerald-500 peer-checked:text-emerald-800 text-xs font-bold flex items-center gap-2 transition">
+                                <span>✅</span> <span>เห็นด้วย / จุดแข็ง</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="point_type" value="question" class="peer sr-only">
+                            <div class="p-2.5 rounded-xl border border-slate-200 bg-white/70 peer-checked:bg-purple-50 peer-checked:border-purple-500 peer-checked:text-purple-800 text-xs font-bold flex items-center gap-2 transition">
+                                <span>❓</span> <span>คำถาม / ขอข้อมูลเพิ่ม</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ชื่อผู้แสดงความเห็น / ตำแหน่ง</label>
+                    <input type="text" id="pin_author" required placeholder="เช่น นพ.สมชาย (แพทย์เวร) / พว.สุภาภรณ์ (PCT)" class="w-full bg-white/80 border border-slate-300 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">รายละเอียดความเห็น ณ จุดนี้ <span class="text-rose-500">*</span></label>
+                    <textarea id="pin_text" required rows="3" placeholder="ระบุประเด็นวิเคราะห์เชิงลึก ข้อสังเกต หรือข้อเสนอแนะ..." class="w-full bg-white/80 border border-slate-300 rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closePointModal()" class="px-4 py-2 rounded-xl bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 font-semibold text-xs cursor-pointer transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold text-xs shadow-lg cursor-pointer flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-thumbtack"></i>
+                        <span>ปักหมุดความเห็นลง Mapping</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal (Custom Glass Dialog replacing confirm()) -->
+    <div id="confirmDeleteModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4 no-print">
+        <div class="bg-white/95 backdrop-blur-2xl border border-white w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 text-rose-600">
+                <div class="w-11 h-11 rounded-2xl bg-rose-100 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">ยืนยันการลบกรณีศึกษา</h3>
+                    <p class="text-xs text-slate-500">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600">คุณต้องการลบกรณีศึกษานี้ออกจากฐานข้อมูล KS study studios ใช่หรือไม่?</p>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeConfirmDelete()" class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs cursor-pointer">ยกเลิก</button>
+                <button id="btnConfirmDeleteExecute" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-md cursor-pointer">ยืนยันการลบ</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Form บันทึก/แก้ไขเคส -->
-    <div id="newCaseModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 hidden flex justify-center items-center p-4 overflow-y-auto no-print">
-        <div class="bg-white border border-slate-200 w-full max-w-4xl rounded-2xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
-            <div class="p-5 bg-slate-900 text-white flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <i class="fa-solid fa-file-pen text-emerald-400 text-xl"></i>
+    <div id="newCaseModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4 overflow-y-auto no-print">
+        <div class="bg-white/95 backdrop-blur-2xl border border-white w-full max-w-4xl rounded-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-2.5">
+                    <div class="p-2 rounded-xl bg-emerald-500/20 border border-emerald-400/30 text-emerald-400">
+                        <i class="fa-solid fa-file-pen text-lg"></i>
+                    </div>
                     <h3 class="text-lg font-bold" id="formModalTitle">บันทึกรายละเอียดกรณีศึกษา (ผู้บันทึกในเหตุการณ์)</h3>
                 </div>
-                <button onclick="closeNewCaseModal()" class="text-slate-400 hover:text-white text-2xl font-bold px-2 cursor-pointer">&times;</button>
+                <button onclick="closeNewCaseModal()" class="w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-xl font-bold cursor-pointer">&times;</button>
             </div>
             
-            <form id="caseForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50">
+            <form id="caseForm" onsubmit="handleFormSubmit(event)" class="p-6 overflow-y-auto space-y-6 flex-1 bg-slate-50/70">
                 <input type="hidden" id="form_case_id">
                 
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
-                    <h4 class="text-sm font-bold text-blue-800 uppercase tracking-wide border-b pb-2">ข้อมูลผู้ป่วยและหน่วยงาน</h4>
+                <div class="glass-panel p-5 rounded-2xl space-y-4">
+                    <h4 class="text-sm font-bold text-indigo-900 uppercase tracking-wide border-b border-slate-200/70 pb-2">ข้อมูลผู้ป่วยและหน่วยงาน</h4>
                     
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">เหตุผลในการทบทวน <span class="text-rose-500">*</span></label>
-                            <select id="form_module_type" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <select id="form_module_type" required class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                                 <option value="Dead">ผู้ป่วยเสียชีวิต (Dead)</option>
                                 <option value="Refer">Refer in 24 ชม.</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">แผนก/หน่วยงานที่ทบทวน <span class="text-rose-500">*</span></label>
-                            <select id="form_department" required onchange="checkOtherDept(this)" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <select id="form_department" required onchange="checkOtherDept(this)" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                                 <option value="IPDชาย">IPDชาย</option>
                                 <option value="IPDหญิง">IPDหญิง</option>
                                 <option value="ER">ER</option>
@@ -181,30 +398,30 @@
                         </div>
                         <div id="otherDeptWrapper" class="hidden">
                             <label class="block text-xs font-semibold text-slate-700 mb-1">ระบุแผนกอื่นๆ</label>
-                            <input type="text" id="form_department_other" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <input type="text" id="form_department_other" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">เลขที่เวชระเบียน (HN) <span class="text-rose-500">*</span></label>
-                            <input type="text" id="form_hn" required placeholder="เช่น 0064156" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <input type="text" id="form_hn" required placeholder="เช่น 0064156" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">เลขที่ Admit (AN)</label>
-                            <input type="text" id="form_an" placeholder="เช่น 690003863" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <input type="text" id="form_an" placeholder="เช่น 690003863" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                        <div class="bg-white/60 p-3 rounded-xl border border-slate-200/80 space-y-1">
                             <label class="block text-xs font-bold text-slate-700">วัน/เวลา Admit</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="date" id="form_admit_date" class="bg-white border border-slate-300 rounded-lg p-2 text-sm">
                                 <input type="time" id="form_admit_time" class="bg-white border border-slate-300 rounded-lg p-2 text-sm">
                             </div>
                         </div>
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                        <div class="bg-white/60 p-3 rounded-xl border border-slate-200/80 space-y-1">
                             <label class="block text-xs font-bold text-slate-700">วัน/เวลา Discharge / เสียชีวิต</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="date" id="form_discharge_date" class="bg-white border border-slate-300 rounded-lg p-2 text-sm">
@@ -216,31 +433,31 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">การวินิจฉัยโรคหลัก (Primary Diagnosis) <span class="text-rose-500">*</span></label>
-                            <textarea id="form_primary_diagnosis" required rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
+                            <textarea id="form_primary_diagnosis" required rows="2" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">ภาวะแทรกซ้อน (Complications)</label>
-                            <textarea id="form_complications" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
+                            <textarea id="form_complications" rows="2" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">ผู้ทบทวนเคส (ชื่อ-สกุล / ตำแหน่ง)</label>
-                            <input type="text" id="form_reviewer_name" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <input type="text" id="form_reviewer_name" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่ทบทวนเคส</label>
-                            <input type="date" id="form_review_date" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm">
+                            <input type="date" id="form_review_date" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm">
                         </div>
                     </div>
                 </div>
 
                 <!-- Timeline Builder -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
-                    <div class="flex justify-between items-center border-b pb-2">
+                <div class="glass-panel p-5 rounded-2xl space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200/70 pb-2">
                         <h4 class="text-sm font-bold text-emerald-800 uppercase tracking-wide">ลำดับ Timeline เหตุการณ์</h4>
-                        <button type="button" onclick="addTimelineRow()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer">
+                        <button type="button" onclick="addTimelineRow()" class="bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-800 border border-emerald-300 text-xs px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer">
                             <i class="fa-solid fa-plus"></i> เพิ่ม Timeline
                         </button>
                     </div>
@@ -248,21 +465,21 @@
                 </div>
 
                 <!-- จุดแข็ง/จุดอ่อน -->
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-3">
-                    <h4 class="text-sm font-bold text-blue-800 uppercase tracking-wide border-b pb-2">วิเคราะห์เบื้องต้น</h4>
+                <div class="glass-panel p-5 rounded-2xl space-y-3">
+                    <h4 class="text-sm font-bold text-indigo-900 uppercase tracking-wide border-b border-slate-200/70 pb-2">วิเคราะห์เบื้องต้น</h4>
                     <div>
                         <label class="block text-xs font-semibold text-emerald-700 mb-1">จุดแข็ง / สิ่งที่ทำได้ดี</label>
-                        <textarea id="form_strengths" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
+                        <textarea id="form_strengths" rows="2" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-rose-700 mb-1">จุดอ่อน / สิ่งที่ควรพัฒนา</label>
-                        <textarea id="form_weaknesses" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
+                        <textarea id="form_weaknesses" rows="2" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2 text-sm"></textarea>
                     </div>
                 </div>
 
                 <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="closeNewCaseModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 text-slate-700 font-semibold text-sm cursor-pointer">ยกเลิก</button>
-                    <button type="submit" id="btnSubmitForm" class="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm cursor-pointer">บันทึกข้อมูล</button>
+                    <button type="button" onclick="closeNewCaseModal()" class="px-5 py-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 font-semibold text-sm cursor-pointer">ยกเลิก</button>
+                    <button type="submit" id="btnSubmitForm" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-sm shadow-lg cursor-pointer">บันทึกข้อมูล</button>
                 </div>
             </form>
         </div>
@@ -277,6 +494,41 @@
         let allCases = [];
         let timelineCount = 0;
         let currentActiveCase = null;
+        let activeMappingFilter = 'ALL'; // ALL, suggestion, risk, strength, question
+        let pendingDeleteCaseId = null;
+
+        // Point Comment Type Metadata
+        const POINT_TYPES = {
+            suggestion: { label: 'ข้อเสนอแนะ', icon: '💡', badgeClass: 'bg-cyan-100/90 text-cyan-800 border-cyan-300', dotColor: 'bg-cyan-500' },
+            risk:       { label: 'จุดเสี่ยง/ข้อสังเกต', icon: '⚠️', badgeClass: 'bg-amber-100/90 text-amber-800 border-amber-300', dotColor: 'bg-amber-500' },
+            strength:   { label: 'เห็นด้วย/จุดแข็ง', icon: '✅', badgeClass: 'bg-emerald-100/90 text-emerald-800 border-emerald-300', dotColor: 'bg-emerald-500' },
+            question:   { label: 'คำถาม/ข้อมูลเพิ่ม', icon: '❓', badgeClass: 'bg-purple-100/90 text-purple-800 border-purple-300', dotColor: 'bg-purple-500' }
+        };
+
+        // Toast Notification System (Replaces alert())
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const colors = type === 'success' 
+                ? 'bg-slate-900/90 text-white border-emerald-400/50' 
+                : 'bg-rose-950/90 text-white border-rose-400/50';
+            const icon = type === 'success' 
+                ? '<i class="fa-solid fa-circle-check text-emerald-400"></i>' 
+                : '<i class="fa-solid fa-circle-exclamation text-rose-400"></i>';
+
+            toast.className = `${colors} backdrop-blur-xl border px-4 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
 
         // แปลงรูปแบบวันที่เป็น ภาษาไทย วว/ดด/25XX (พ.ศ.)
         function formatThaiDate(dateStr) {
@@ -297,17 +549,16 @@
             selectedModule = module;
             selectedSubMenu = subMenu;
 
-            // Reset view to grid
             document.getElementById('fullpageDebateView').classList.add('hidden');
             document.getElementById('caseGrid').classList.remove('hidden');
 
             document.querySelectorAll('aside button[id^="menu-"]').forEach(btn => {
-                btn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 flex justify-between items-center cursor-pointer";
+                btn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer transition";
             });
 
             const activeBtn = document.getElementById(`menu-${module}-${subMenu}`);
             if(activeBtn) {
-                activeBtn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium bg-blue-600 text-white flex justify-between items-center cursor-pointer shadow-sm";
+                activeBtn.className = "w-full text-left px-3 py-2 rounded-xl text-sm font-medium bg-gradient-to-r from-cyan-500/80 to-blue-600/80 text-white border border-white/20 flex justify-between items-center cursor-pointer shadow-md";
             }
 
             document.getElementById('currentCategoryTitle').innerText = `${module === 'Dead' ? 'Mortality Review (Dead)' : 'Refer in 24 ชม.'}: ${subMenu}`;
@@ -320,8 +571,11 @@
                     allCases = getMockCases();
                 } else {
                     let res = await fetch(`${WEB_APP_URL}?action=getCases`);
-                    allCases = await res.json();
+                    const data = await res.json();
+                    allCases = Array.isArray(data) && data.length > 0 ? data : getMockCases();
                 }
+                // Ensure every case has point_comments array
+                allCases.forEach(c => { if (!c.point_comments) c.point_comments = []; });
                 updateSidebarCounts();
                 renderCases();
             } catch (err) {
@@ -362,300 +616,509 @@
 
             if(filtered.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full bg-white border border-slate-200 rounded-2xl p-12 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i>
-                        <p class="text-sm font-semibold">ไม่พบข้อมูลกรณีศึกษาในหมวดนี้</p>
+                    <div class="col-span-full glass-panel rounded-3xl p-12 text-center text-slate-500">
+                        <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/70 flex items-center justify-center text-slate-400 text-2xl shadow-inner">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </div>
+                        <p class="text-sm font-bold text-slate-700">ไม่พบข้อมูลกรณีศึกษาในหมวดนี้</p>
+                        <p class="text-xs text-slate-500 mt-1">คลิก "+ บันทึกกรณีศึกษาใหม่" เพื่อเพิ่มข้อมูลเข้าสู่ KS study studios</p>
                     </div>
                 `;
                 return;
             }
 
-            grid.innerHTML = filtered.map(c => `
-                <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg transition flex flex-col justify-between space-y-4">
+            grid.innerHTML = filtered.map(c => {
+                const pointCount = (c.point_comments || []).length;
+                const groupCount = new Set((c.point_comments || []).map(p => p.node_id)).size;
+
+                return `
+                <div class="glass-panel rounded-3xl p-5 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between space-y-4">
                     <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold px-3 py-1 rounded-full ${c.module_type === 'Dead' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">
+                        <div class="flex justify-between items-start mb-3">
+                            <span class="text-xs font-bold px-3 py-1 rounded-full backdrop-blur-md border ${c.module_type === 'Dead' ? 'bg-rose-500/15 text-rose-700 border-rose-300/60' : 'bg-amber-500/15 text-amber-800 border-amber-300/60'}">
                                 ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต' : 'Refer in 24 ชม.'}
                             </span>
-                            <span class="text-xs text-slate-600 font-medium bg-slate-100 px-2 py-0.5 rounded-lg">${c.department || 'IPD'}</span>
+                            <span class="text-xs text-slate-700 font-semibold bg-white/70 border border-white px-2.5 py-0.5 rounded-xl shadow-2xs">${c.department || 'IPD'}</span>
                         </div>
                         <div class="text-base font-bold text-slate-900 mb-1">
-                            HN: <span class="text-blue-700">${c.hn}</span> ${c.an ? `| AN: ${c.an}` : ''}
+                            HN: <span class="text-indigo-700">${c.hn}</span> ${c.an ? `<span class="text-slate-400 font-normal">|</span> AN: ${c.an}` : ''}
                         </div>
-                        <p class="text-sm font-semibold text-slate-700 line-clamp-2 mb-2">Dx: ${c.primary_diagnosis}</p>
-                        <div class="text-xs text-slate-500 space-y-1">
-                            <div><i class="fa-solid fa-user-nurse mr-1 text-blue-500"></i> ผู้บันทึก: ${c.reviewer_name || '-'}</div>
-                            <div><i class="fa-solid fa-calendar-day mr-1 text-blue-500"></i> วันที่ทบทวน: ${formatThaiDate(c.review_date)}</div>
+                        <p class="text-sm font-semibold text-slate-700 line-clamp-2 mb-3">Dx: ${c.primary_diagnosis}</p>
+                        
+                        <div class="bg-white/50 rounded-2xl p-2.5 border border-white/70 text-xs text-slate-600 space-y-1">
+                            <div><i class="fa-solid fa-user-nurse mr-1.5 text-cyan-600"></i> ผู้บันทึก: <span class="font-medium text-slate-800">${c.reviewer_name || '-'}</span></div>
+                            <div><i class="fa-solid fa-calendar-day mr-1.5 text-indigo-500"></i> วันที่ทบทวน: <span class="font-medium text-slate-800">${formatThaiDate(c.review_date)}</span></div>
                         </div>
                     </div>
 
-                    <!-- Action Toolbar -->
-                    <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
-                        <button onclick="openFullpageDebate('${c.case_id}')" class="w-full bg-slate-900 hover:bg-blue-700 text-white py-2 rounded-xl text-sm font-semibold transition flex items-center justify-center space-x-2 cursor-pointer shadow-xs">
-                            <i class="fa-solid fa-comments"></i>
-                            <span>เปิดดูข้อมูล & Debate เต็มหน้า</span>
+                    <!-- Point Mapping Summary Badge & Action Toolbar -->
+                    <div class="pt-2 border-t border-white/60 flex flex-col gap-2.5">
+                        <div class="flex items-center justify-between text-[11px] px-1">
+                            <span class="text-slate-600 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-diagram-project text-cyan-600"></i>
+                                Mapping Groups: <strong class="text-indigo-700">${groupCount} จุด</strong>
+                            </span>
+                            <span class="bg-cyan-500/15 text-cyan-800 border border-cyan-300/60 px-2 py-0.5 rounded-full font-bold">
+                                ${pointCount} Points
+                            </span>
+                        </div>
+
+                        <button onclick="openFullpageDebate('${c.case_id}')" class="w-full bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 hover:from-cyan-700 hover:to-blue-700 text-white py-2.5 rounded-2xl text-xs font-bold transition-all flex items-center justify-center space-x-2 cursor-pointer shadow-md border border-white/15">
+                            <i class="fa-solid fa-sitemap text-cyan-300"></i>
+                            <span>เปิด Debate Mapping &amp; วิเคราะห์ RCA</span>
                         </button>
-                        <div class="flex justify-end space-x-2 text-xs">
-                            <button onclick="openEditCase('${c.case_id}')" class="text-amber-600 hover:underline cursor-pointer"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                        <div class="flex justify-end space-x-3 text-xs px-1">
+                            <button onclick="openEditCase('${c.case_id}')" class="text-amber-700 hover:text-amber-900 font-semibold cursor-pointer"><i class="fa-solid fa-pen"></i> แก้ไข</button>
                             <span class="text-slate-300">|</span>
-                            <button onclick="deleteCase('${c.case_id}')" class="text-rose-600 hover:underline cursor-pointer"><i class="fa-solid fa-trash"></i> ลบ</button>
+                            <button onclick="requestDeleteCase('${c.case_id}')" class="text-rose-600 hover:text-rose-800 font-semibold cursor-pointer"><i class="fa-solid fa-trash"></i> ลบ</button>
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // ข้อ 3, 4, 5, 6: Fullpage Debate View & RCA MAP Structure
+        // Helper: Render Pin Button & Point Counter Badge on any node
+        function renderPinButton(nodeId, nodeLabel, nodeCategory) {
+            const count = (currentActiveCase?.point_comments || []).filter(p => p.node_id === nodeId).length;
+            const safeLabel = nodeLabel.replace(/'/g, "\\'");
+            return `
+                <button type="button" onclick="openPointModal('${nodeId}', '${safeLabel}', '${nodeCategory}')" 
+                    class="no-print group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border shadow-2xs
+                    ${count > 0 
+                        ? 'bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-indigo-900 border-cyan-400/70 hover:from-cyan-500 hover:to-blue-600 hover:text-white' 
+                        : 'bg-white/75 text-slate-700 border-white hover:bg-cyan-600 hover:text-white hover:border-cyan-500'}">
+                    <i class="fa-solid fa-thumbtack ${count > 0 ? 'text-cyan-600 group-hover:text-white' : 'text-slate-400 group-hover:text-white'}"></i>
+                    <span>Debate จุดนี้</span>
+                    ${count > 0 ? `<span class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-600 text-white group-hover:bg-white group-hover:text-indigo-900">${count}</span>` : ''}
+                </button>
+            `;
+        }
+
+        // Fullpage Debate View & Point-by-Point Mapping Group Architecture
         function openFullpageDebate(caseId) {
             const c = allCases.find(item => item.case_id === caseId);
             if(!c) return;
 
             currentActiveCase = c;
+            if(!currentActiveCase.point_comments) currentActiveCase.point_comments = [];
+
             document.getElementById('caseGrid').classList.add('hidden');
             const view = document.getElementById('fullpageDebateView');
             view.classList.remove('hidden');
 
+            const m6Items = [
+                { id: 'node-6m-1', field: 'rca_m1', key: 'm1_person', title: '1. Man/Person (คน/บุคลากร)', hint: 'เช่น ฝึกอบรมไม่เพียงพอ, ความเหนื่อยล้า, ละเลยขั้นตอน', placeholder: 'ระบุปัจจัยทางด้านบุคลากร...' },
+                { id: 'node-6m-2', field: 'rca_m2', key: 'm2_method', title: '2. Method (วิธีการ/กระบวนการ)', hint: 'ขั้นตอนไม่ชัดเจน/ขาดหาย, ไม่ปฏิบัติตามแนวทาง', placeholder: 'ระบุปัจจัยด้านกระบวนการ...' },
+                { id: 'node-6m-3', field: 'rca_m3', key: 'm3_machine', title: '3. Machine/Equipment (เครื่องมือ/อุปกรณ์)', hint: 'เครื่องมือชำรุด, ขาดการบำรุงรักษา, อุปกรณ์ไม่พร้อม', placeholder: 'ระบุปัจจัยด้านเครื่องมือ...' },
+                { id: 'node-6m-4', field: 'rca_m4', key: 'm4_material', title: '4. Material (วัสดุ/ยา/ข้อมูล)', hint: 'ข้อมูลไม่ถูกต้อง/ล่าช้า, โปรแกรมมีปัญหา, ยาไม่พร้อม', placeholder: 'ระบุปัจจัยด้านยาและวัสดุ...' },
+                { id: 'node-6m-5', field: 'rca_m5', key: 'm5_management', title: '5. Management/System (ระบบการจัดการ)', hint: 'นโยบายไม่ชัดเจน, สื่อสารล้มเหลว, ขาดการตรวจสอบ', placeholder: 'ระบุปัจจัยด้านระบบบริหาร...' },
+                { id: 'node-6m-6', field: 'rca_m6', key: 'm6_environment', title: '6. Environment (สภาพแวดล้อม)', hint: 'สภาพแวดล้อมทำงานไม่เหมาะสม, เสียงดัง/คับแคบ', placeholder: 'ระบุปัจจัยด้านสภาพแวดล้อม...' }
+            ];
+
             view.innerHTML = `
-                <!-- Header Toolbar (ดูภาพรวม, แก้ไข, ลบ, พิมพ์ PDF) -->
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-wrap justify-between items-center gap-3 mb-6 no-print">
-                    <button onclick="selectMenu('${c.module_type}', '${selectedSubMenu}')" class="text-slate-600 hover:text-slate-900 font-semibold text-sm flex items-center space-x-2 cursor-pointer">
+                <!-- Glass Top Toolbar -->
+                <div class="glass-panel p-4 rounded-3xl flex flex-wrap justify-between items-center gap-3 mb-6 no-print">
+                    <button onclick="selectMenu('${c.module_type}', '${selectedSubMenu}')" class="bg-white/70 hover:bg-white text-slate-700 hover:text-slate-900 px-4 py-2 rounded-2xl font-bold text-xs flex items-center space-x-2 cursor-pointer border border-white shadow-2xs transition">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>กลับไปรายการเคส</span>
                     </button>
                     
-                    <div class="flex items-center space-x-2">
-                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="#mappingGroupSection" class="bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white px-4 py-2 rounded-2xl text-xs font-bold flex items-center space-x-1.5 shadow-md">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>ดูผัง Mapping Group (${c.point_comments.length})</span>
+                        </a>
+                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-2xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                             <i class="fa-solid fa-file-pdf"></i>
                             <span>บันทึกเป็น PDF / พิมพ์</span>
                         </button>
-                        <button onclick="openEditCase('${c.case_id}')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                        <button onclick="openEditCase('${c.case_id}')" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-2xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                             <i class="fa-solid fa-pen"></i>
                             <span>แก้ไขเคส</span>
                         </button>
-                        <button onclick="deleteCase('${c.case_id}')" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                        <button onclick="requestDeleteCase('${c.case_id}')" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2 rounded-2xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                             <i class="fa-solid fa-trash"></i>
                             <span>ลบเคส</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Printable RCA MAP Container -->
-                <div class="space-y-6 print-full">
-                    <!-- Section 1: ข้อมูลผู้ป่วย -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs relative">
-                        <div class="flex justify-between items-start border-b pb-3 mb-3">
-                            <div>
-                                <span class="text-xs font-bold px-3 py-1 rounded-full ${c.module_type === 'Dead' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">
-                                    ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต (Mortality Review)' : 'Refer in 24 ชม.'}
-                                </span>
-                                <h3 class="text-xl font-bold text-slate-900 mt-2">HN: ${c.hn} ${c.an ? `| AN: ${c.an}` : ''}</h3>
-                            </div>
-                            <button onclick="addCommentToSection('ข้อมูลทั่วไปผู้ป่วย')" class="no-print bg-blue-50 text-blue-700 hover:bg-blue-100 px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer">
-                                <i class="fa-solid fa-comment-dots"></i> Debate จุดนี้
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                            <div><strong>แผนก:</strong> ${c.department}</div>
-                            <div><strong>Admit:</strong> ${c.admit_datetime || '-'}</div>
-                            <div><strong>Discharge/Dead:</strong> ${c.discharge_datetime || '-'}</div>
-                            <div><strong>วันที่ทบทวน:</strong> ${formatThaiDate(c.review_date)}</div>
-                            <div class="col-span-full"><strong>Diagnosis:</strong> ${c.primary_diagnosis}</div>
-                            <div class="col-span-full"><strong>Complications:</strong> ${c.complications || '-'}</div>
-                        </div>
-                    </div>
-
-                    <!-- Section 2: Clinical Timeline -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-                        <h4 class="text-base font-bold text-emerald-800 mb-4 border-b pb-2 flex items-center justify-between">
-                            <span><i class="fa-solid fa-timeline"></i> ลำดับเหตุการณ์ (Clinical Timeline)</span>
-                        </h4>
-                        <div class="space-y-3 pl-3 border-l-2 border-emerald-400">
-                            ${(c.timelines || []).map((t, idx) => `
-                                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm relative">
-                                    <div class="flex justify-between items-start">
-                                        <span class="font-bold text-emerald-700">${t.event_datetime}</span>
-                                        <button onclick="addCommentToSection('Timeline เหตุการณ์ที่ ${idx+1}')" class="no-print text-xs text-blue-600 hover:underline font-bold cursor-pointer">
-                                            <i class="fa-solid fa-comment-dots"></i> Debate Timeline นี้
-                                        </button>
-                                    </div>
-                                    <div class="mt-1"><strong>อาการ/VS:</strong> ${t.clinical_signs}</div>
-                                    <div class="mt-1"><strong>การดูแล/ยา/Lab:</strong> ${t.management}</div>
+                <!-- Two-Column Workspace on Large Screens: Left = Clinical Case & RCA Nodes, Right = Sticky Point Mapping Board -->
+                <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start print-full">
+                    
+                    <!-- LEFT COLUMN (7 Cols): Clinical Details, Timeline, 6Ms, Action Plan -->
+                    <div class="xl:col-span-7 space-y-6 print-full">
+                        
+                        <!-- Section 1: ข้อมูลผู้ป่วย -->
+                        <div id="node-general" class="glass-panel p-6 rounded-3xl relative transition-all">
+                            <div class="flex flex-wrap justify-between items-start gap-2 border-b border-slate-200/70 pb-3 mb-4">
+                                <div>
+                                    <span class="text-xs font-bold px-3 py-1 rounded-full ${c.module_type === 'Dead' ? 'bg-rose-500/15 text-rose-700 border border-rose-300' : 'bg-amber-500/15 text-amber-800 border border-amber-300'}">
+                                        ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต (Mortality Review)' : 'Refer in 24 ชม.'}
+                                    </span>
+                                    <h3 class="text-xl font-extrabold text-slate-900 mt-2">HN: <span class="text-indigo-700">${c.hn}</span> ${c.an ? `| AN: ${c.an}` : ''}</h3>
                                 </div>
-                            `).join('')}
+                                ${renderPinButton('node-general', 'ข้อมูลทั่วไปผู้ป่วย & การวินิจฉัย', 'ข้อมูลผู้ป่วย')}
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm bg-white/55 p-4 rounded-2xl border border-white/80">
+                                <div><strong class="text-slate-600">แผนก:</strong> <span class="font-semibold">${c.department}</span></div>
+                                <div><strong class="text-slate-600">วันที่ทบทวน:</strong> <span class="font-semibold">${formatThaiDate(c.review_date)}</span></div>
+                                <div><strong class="text-slate-600">Admit:</strong> <span>${c.admit_datetime || '-'}</span></div>
+                                <div><strong class="text-slate-600">Discharge/Dead:</strong> <span>${c.discharge_datetime || '-'}</span></div>
+                                <div class="col-span-full pt-1 border-t border-slate-200/60"><strong class="text-indigo-900">Primary Diagnosis:</strong> <span class="font-semibold">${c.primary_diagnosis}</span></div>
+                                <div class="col-span-full"><strong class="text-rose-800">Complications:</strong> <span>${c.complications || '-'}</span></div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Section 3: RCA Fishbone 6Ms MAP Diagram -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                        <div class="border-b pb-2 flex justify-between items-center">
-                            <h4 class="text-base font-bold text-slate-900 flex items-center space-x-2">
-                                <i class="fa-solid fa-diagram-project text-blue-600"></i>
-                                <span>แผนผังวิเคราะห์ปัจจัย (6Ms RCA MAP Diagram)</span>
+                        <!-- Section 2: Clinical Timeline -->
+                        <div class="glass-panel p-6 rounded-3xl">
+                            <h4 class="text-base font-bold text-emerald-900 mb-4 border-b border-slate-200/70 pb-2.5 flex items-center justify-between">
+                                <span class="flex items-center gap-2"><i class="fa-solid fa-timeline text-emerald-600"></i> ลำดับเหตุการณ์ (Clinical Timeline)</span>
+                                <span class="text-xs font-normal text-slate-500">ปักหมุดอภิปรายแยกตามช่วงเวลาได้</span>
                             </h4>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <!-- 1. Man/Person -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">1. Man/Person (คน/บุคลากร)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">เช่น ฝึกอบรมไม่เพียงพอ, ความเหนื่อยล้า, ละเลยขั้นตอน</p>
-                                    <textarea id="rca_m1" rows="3" placeholder="ระบุปัจจัยทางด้านบุคลากร..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Man/Person')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
-                            </div>
-
-                            <!-- 2. Method -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">2. Method (วิธีการ/กระบวนการ)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">ขั้นตอนไม่ชัดเจน/ขาดหาย, ไม่ปฏิบัติตามแนวทาง</p>
-                                    <textarea id="rca_m2" rows="3" placeholder="ระบุปัจจัยด้านกระบวนการ..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Method')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
-                            </div>
-
-                            <!-- 3. Machine/Equipment -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">3. Machine/Equipment (เครื่องมือ/อุปกรณ์)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">เครื่องมือชำรุด, ขาดการบำรุงรักษา, อุปกรณ์ไม่พร้อม</p>
-                                    <textarea id="rca_m3" rows="3" placeholder="ระบุปัจจัยด้านเครื่องมือ..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Machine')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
-                            </div>
-
-                            <!-- 4. Material -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">4. Material (วัสดุ/ยา/ข้อมูล)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">ข้อมูลไม่ถูกต้อง/ล่าช้า, โปรแกรมมีปัญหา, ยาไม่พร้อม</p>
-                                    <textarea id="rca_m4" rows="3" placeholder="ระบุปัจจัยด้านยาและวัสดุ..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Material')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
-                            </div>
-
-                            <!-- 5. Management/System -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">5. Management/System (ระบบการจัดการ)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">นโยบายไม่ชัดเจน, สื่อสารล้มเหลว, ขาดการตรวจสอบ</p>
-                                    <textarea id="rca_m5" rows="3" placeholder="ระบุปัจจัยด้านระบบบริหาร..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Management')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
-                            </div>
-
-                            <!-- 6. Environment -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h5 class="font-bold text-blue-900 border-b border-blue-200 pb-1 mb-2">6. Environment (สภาพแวดล้อม)</h5>
-                                    <p class="text-xs text-slate-600 mb-2">สภาพแวดล้อมทำงานไม่เหมาะสม, เสียงดัง/คับแคบ</p>
-                                    <textarea id="rca_m6" rows="3" placeholder="ระบุปัจจัยด้านสภาพแวดล้อม..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
-                                </div>
-                                <button onclick="addCommentToSection('6Ms: Environment')" class="no-print mt-2 text-right text-xs text-blue-600 font-bold hover:underline cursor-pointer">💬 Debate หัวข้อนี้</button>
+                            <div class="space-y-3 pl-4 border-l-2 border-emerald-400/80">
+                                ${(c.timelines || []).map((t, idx) => {
+                                    const tlNodeId = `node-tl-${idx}`;
+                                    const tlLabel = `Timeline #${idx+1}: ${t.event_datetime}`;
+                                    return `
+                                    <div id="${tlNodeId}" class="glass-card-inner p-4 rounded-2xl text-sm relative transition-all hover:bg-white/75">
+                                        <div class="flex flex-wrap justify-between items-start gap-2 mb-1.5">
+                                            <span class="font-bold text-emerald-800 bg-emerald-500/10 px-2.5 py-0.5 rounded-lg border border-emerald-200">${t.event_datetime}</span>
+                                            ${renderPinButton(tlNodeId, tlLabel, 'Timeline')}
+                                        </div>
+                                        <div class="mt-1.5 text-slate-800"><strong>อาการ/VS:</strong> ${t.clinical_signs}</div>
+                                        <div class="mt-1 text-slate-700"><strong>การดูแล/ยา/Lab:</strong> ${t.management}</div>
+                                    </div>
+                                    `;
+                                }).join('')}
                             </div>
                         </div>
 
-                        <!-- Proximate Cause -->
-                        <div class="bg-amber-50 border border-amber-200 p-4 rounded-2xl">
-                            <h5 class="font-bold text-amber-900 mb-1"><i class="fa-solid fa-bullseye text-amber-600"></i> ข้อค้นพบ / สาเหตุที่เกิดขึ้นจริง (Proximate Cause)</h5>
-                            <textarea id="rca_proximate_cause" rows="2" placeholder="ระบุสาเหตุแท้จริงที่ทำให้เกิดปัญหา..." class="w-full bg-white border border-amber-200 rounded-xl p-2.5 text-xs text-slate-800"></textarea>
+                        <!-- Section 3: RCA Fishbone 6Ms MAP Diagram -->
+                        <div class="glass-panel p-6 rounded-3xl space-y-4">
+                            <div class="border-b border-slate-200/70 pb-2.5 flex justify-between items-center">
+                                <h4 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+                                    <i class="fa-solid fa-diagram-project text-indigo-600"></i>
+                                    <span>แผนผังวิเคราะห์ปัจจัย (6Ms RCA MAP Diagram)</span>
+                                </h4>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${m6Items.map(item => `
+                                    <div id="${item.id}" class="bg-gradient-to-br from-white/75 to-indigo-50/60 backdrop-blur-md border border-white p-4 rounded-2xl flex flex-col justify-between shadow-xs transition-all">
+                                        <div>
+                                            <div class="flex justify-between items-start gap-2 border-b border-indigo-100 pb-2 mb-2">
+                                                <h5 class="font-bold text-indigo-950 text-sm">${item.title}</h5>
+                                            </div>
+                                            <p class="text-xs text-slate-500 mb-2">${item.hint}</p>
+                                            <textarea id="${item.field}" rows="2" placeholder="${item.placeholder}" class="w-full bg-white/85 border border-indigo-200/80 rounded-xl p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500">${c[item.key] || ''}</textarea>
+                                        </div>
+                                        <div class="mt-2.5 flex justify-end">
+                                            ${renderPinButton(item.id, `6Ms: ${item.title}`, '6Ms RCA')}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+
+                            <!-- Proximate Cause -->
+                            <div id="node-proximate" class="bg-gradient-to-r from-amber-50/85 to-orange-50/75 border border-amber-200/80 p-4 rounded-2xl transition-all">
+                                <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+                                    <h5 class="font-bold text-amber-950 text-sm"><i class="fa-solid fa-bullseye text-amber-600 mr-1"></i> ข้อค้นพบ / สาเหตุที่เกิดขึ้นจริง (Proximate Cause)</h5>
+                                    ${renderPinButton('node-proximate', 'Proximate Cause (สาเหตุที่เกิดขึ้นจริง)', 'Proximate Cause')}
+                                </div>
+                                <textarea id="rca_proximate_cause" rows="2" placeholder="ระบุสาเหตุแท้จริงที่ทำให้เกิดปัญหา..." class="w-full bg-white/85 border border-amber-200 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">${c.proximate_cause || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Section 4: มาตรการแก้ไข 3 ระดับ -->
+                        <div class="glass-panel p-6 rounded-3xl space-y-4">
+                            <h4 class="text-base font-bold text-slate-900 border-b border-slate-200/70 pb-2.5 flex items-center space-x-2">
+                                <i class="fa-solid fa-list-check text-emerald-600"></i>
+                                <span>ข้อเสนอแนะและมาตรการแก้ไข 3 ระดับ (Action Plan)</span>
+                            </h4>
+
+                            <div class="space-y-3.5">
+                                <!-- 1. Correction -->
+                                <div id="node-act-1" class="bg-amber-50/70 border border-amber-200/80 p-4 rounded-2xl transition-all">
+                                    <div class="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+                                        <h5 class="font-bold text-amber-950 text-sm">1. การแก้ไขเฉพาะหน้า (Correction)</h5>
+                                        ${renderPinButton('node-act-1', 'Action 1: การแก้ไขเฉพาะหน้า (Correction)', 'Action Plan')}
+                                    </div>
+                                    <textarea id="rca_correction" rows="2" placeholder="ระบุมาตรการแก้ไขเฉพาะหน้าทันที..." class="w-full bg-white/85 border border-amber-200 rounded-xl p-2.5 text-xs">${c.correction || ''}</textarea>
+                                </div>
+
+                                <!-- 2. Corrective Action -->
+                                <div id="node-act-2" class="bg-sky-50/70 border border-sky-200/80 p-4 rounded-2xl transition-all">
+                                    <div class="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+                                        <h5 class="font-bold text-sky-950 text-sm">2. การแก้ไขที่รากเหง้า (Corrective Action)</h5>
+                                        ${renderPinButton('node-act-2', 'Action 2: การแก้ไขที่รากเหง้า (Corrective Action)', 'Action Plan')}
+                                    </div>
+                                    <textarea id="rca_corrective" rows="2" placeholder="ระบุการปรับปรุงกระบวนการทำงานเพื่อแก้รากเหง้า..." class="w-full bg-white/85 border border-sky-200 rounded-xl p-2.5 text-xs">${c.corrective_action || ''}</textarea>
+                                </div>
+
+                                <!-- 3. Preventive Action -->
+                                <div id="node-act-3" class="bg-emerald-50/70 border border-emerald-200/80 p-4 rounded-2xl transition-all">
+                                    <div class="flex flex-wrap justify-between items-center gap-2 mb-1.5">
+                                        <h5 class="font-bold text-emerald-950 text-sm">3. การป้องกันเชิงระบบ (Preventive Action)</h5>
+                                        ${renderPinButton('node-act-3', 'Action 3: การป้องกันเชิงระบบ (Preventive Action)', 'Action Plan')}
+                                    </div>
+                                    <textarea id="rca_preventive" rows="2" placeholder="ระบุนโยบาย/มาตรการป้องกันเชิงระบบระดับองค์กร..." class="w-full bg-white/85 border border-emerald-200 rounded-xl p-2.5 text-xs">${c.preventive_action || ''}</textarea>
+                                </div>
+                            </div>
+
+                            <!-- ผู้รับผิดชอบ & กำหนดเสร็จ -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">ผู้รับผิดชอบโครงการ/มาตรการ</label>
+                                    <input type="text" id="rca_responsible" value="${c.responsible_person || ''}" placeholder="เช่น ทีม PCT / หัวหน้าตึก IPD3" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2.5 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">กำหนดเสร็จ (Due Date)</label>
+                                    <input type="date" id="rca_due_date" value="${c.due_date || ''}" class="w-full bg-white/80 border border-slate-300 rounded-xl p-2.5 text-xs">
+                                </div>
+                            </div>
+
+                            <div class="text-right pt-2 no-print">
+                                <button onclick="saveDebateRCAData()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-6 py-2.5 rounded-2xl font-bold text-xs shadow-lg cursor-pointer transition">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลวิเคราะห์ RCA &amp; 6Ms
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Section 4: มาตรการแก้ไข 3 ระดับ (แยกข้อชัดเจน) -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-                        <h4 class="text-base font-bold text-slate-900 border-b pb-2 flex items-center space-x-2">
-                            <i class="fa-solid fa-list-check text-emerald-600"></i>
-                            <span>ข้อเสนอแนะและมาตรการแก้ไข 3 ระดับ (Action Plan)</span>
-                        </h4>
-
-                        <div class="space-y-4">
-                            <!-- 1. Correction -->
-                            <div class="bg-amber-50/60 border border-amber-200 p-4 rounded-2xl">
-                                <h5 class="font-bold text-amber-900 mb-1">1. การแก้ไขเฉพาะหน้า (Correction): (เพื่อหยุดยั้งปัญหาในทันที)</h5>
-                                <textarea id="rca_correction" rows="2" placeholder="ระบุมาตรการแก้ไขเฉพาะหน้าทันที..." class="w-full bg-white border border-amber-200 rounded-xl p-2 text-xs"></textarea>
+                    <!-- RIGHT COLUMN (5 Cols): POINT-BY-POINT MAPPING GROUP BOARD -->
+                    <div id="mappingGroupSection" class="xl:col-span-5 xl:sticky xl:top-24 space-y-4 no-print">
+                        <div class="glass-panel rounded-3xl p-5 shadow-xl border border-white">
+                            <!-- Header -->
+                            <div class="flex items-center justify-between border-b border-slate-200/70 pb-3 mb-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-white flex items-center justify-center shadow-md">
+                                        <i class="fa-solid fa-diagram-project"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-base font-extrabold text-slate-900 leading-tight">Point Mapping Board</h4>
+                                        <p class="text-[11px] text-slate-500">จัดกลุ่มความเห็นแยกตามจุดปักหมุดอัตโนมัติ</p>
+                                    </div>
+                                </div>
+                                <span id="totalPointsBadge" class="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-xs">
+                                    0 Points
+                                </span>
                             </div>
 
-                            <!-- 2. Corrective Action -->
-                            <div class="bg-blue-50/60 border border-blue-200 p-4 rounded-2xl">
-                                <h5 class="font-bold text-blue-900 mb-1">2. การแก้ไขที่รากเหง้า (Corrective Action): (เพื่อป้องกันการเกิดซ้ำ โดยเน้นที่ Root Cause)</h5>
-                                <textarea id="rca_corrective" rows="2" placeholder="ระบุการปรับปรุงกระบวนการทำงานเพื่อแก้รากเหง้า..." class="w-full bg-white border border-blue-200 rounded-xl p-2 text-xs"></textarea>
+                            <!-- Filter Pills by Point Type -->
+                            <div class="flex flex-wrap gap-1.5 mb-4" id="mappingFilterBar">
+                                <button onclick="setMappingFilter('ALL')" data-filter="ALL" class="filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-900 text-white cursor-pointer transition">ทั้งหมด</button>
+                                <button onclick="setMappingFilter('suggestion')" data-filter="suggestion" class="filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/70 text-cyan-800 border border-cyan-200 hover:bg-cyan-50 cursor-pointer transition">💡 ข้อเสนอแนะ</button>
+                                <button onclick="setMappingFilter('risk')" data-filter="risk" class="filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/70 text-amber-800 border border-amber-200 hover:bg-amber-50 cursor-pointer transition">⚠️ จุดเสี่ยง</button>
+                                <button onclick="setMappingFilter('strength')" data-filter="strength" class="filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/70 text-emerald-800 border border-emerald-200 hover:bg-emerald-50 cursor-pointer transition">✅ จุดแข็ง</button>
+                                <button onclick="setMappingFilter('question')" data-filter="question" class="filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/70 text-purple-800 border border-purple-200 hover:bg-purple-50 cursor-pointer transition">❓ คำถาม</button>
                             </div>
 
-                            <!-- 3. Preventive Action -->
-                            <div class="bg-emerald-50/60 border border-emerald-200 p-4 rounded-2xl">
-                                <h5 class="font-bold text-emerald-900 mb-1">3. การป้องกัน (Preventive Action): (เพื่อปรับปรุงระบบโดยรวมให้แข็งแกร่งขึ้น)</h5>
-                                <textarea id="rca_preventive" rows="2" placeholder="ระบุนโยบาย/มาตรการป้องกันเชิงระบบระดับองค์กร..." class="w-full bg-white border border-emerald-200 rounded-xl p-2 text-xs"></textarea>
+                            <!-- Mapping Groups Container -->
+                            <div id="mappingGroupsContainer" class="space-y-4 max-h-[68vh] overflow-y-auto pr-1">
+                                <!-- Rendered by renderMappingGroups() -->
                             </div>
-                        </div>
-
-                        <!-- ผู้รับผิดชอบ & กำหนดเสร็จ -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">ผู้รับผิดชอบโครงการ/มาตรการ</label>
-                                <input type="text" id="rca_responsible" placeholder="เช่น ทีม PCT / หัวหน้าตึก IPD3" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1">กำหนดเสร็จ (Due Date)</label>
-                                <input type="date" id="rca_due_date" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2 text-xs">
-                            </div>
-                        </div>
-
-                        <div class="text-right pt-2 no-print">
-                            <button onclick="saveDebateRCAData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow-md cursor-pointer">
-                                <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูลวิเคราะห์ RCA & 6Ms
-                            </button>
                         </div>
                     </div>
 
-                    <!-- Section 5: Realtime Debate Comments Stream -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4 no-print">
-                        <h4 class="text-base font-bold text-slate-900 border-b pb-2 flex items-center space-x-2">
-                            <i class="fa-solid fa-comments text-blue-600"></i>
-                            <span>กระดาน Online Realtime Debate (Conference อภิปรายย่อย)</span>
-                        </h4>
-
-                        <div id="debateCommentStream" class="space-y-2 max-h-60 overflow-y-auto bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <!-- Comments injected here -->
-                        </div>
-
-                        <div class="flex flex-col md:flex-row gap-2 pt-2">
-                            <input type="text" id="debateTargetSection" readonly placeholder="เจาะจงจุดที่จะ debate..." class="w-full md:w-56 bg-slate-100 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-blue-800">
-                            <input type="text" id="debateCommentText" placeholder="พิมพ์ข้อความวิเคราะห์/อภิปราย..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button onclick="submitDebateComment()" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-xl text-xs font-bold shadow-md cursor-pointer">ส่งความเห็น</button>
-                        </div>
-                    </div>
                 </div>
             `;
+
+            renderMappingGroups();
         }
 
-        function addCommentToSection(sectionName) {
-            const targetInput = document.getElementById('debateTargetSection');
-            if (targetInput) {
-                targetInput.value = sectionName;
-                document.getElementById('debateCommentText').focus();
+        function setMappingFilter(filterType) {
+            activeMappingFilter = filterType;
+            document.querySelectorAll('#mappingFilterBar .filter-pill').forEach(btn => {
+                if (btn.dataset.filter === filterType) {
+                    btn.className = "filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-slate-900 text-white cursor-pointer transition shadow-xs";
+                } else {
+                    btn.className = "filter-pill px-2.5 py-1 rounded-xl text-[11px] font-bold bg-white/70 text-slate-700 border border-slate-200 hover:bg-white cursor-pointer transition";
+                }
+            });
+            renderMappingGroups();
+        }
+
+        // Render Grouped Mind-Map Style Point Comments
+        function renderMappingGroups() {
+            const container = document.getElementById('mappingGroupsContainer');
+            const totalBadge = document.getElementById('totalPointsBadge');
+            if (!container || !currentActiveCase) return;
+
+            const allPoints = currentActiveCase.point_comments || [];
+            const filteredPoints = activeMappingFilter === 'ALL' 
+                ? allPoints 
+                : allPoints.filter(p => p.point_type === activeMappingFilter);
+
+            if (totalBadge) {
+                totalBadge.innerText = `${filteredPoints.length} Points`;
             }
+
+            if (filteredPoints.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white/50 border border-dashed border-slate-300 rounded-2xl p-8 text-center space-y-2">
+                        <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-thumbtack"></i>
+                        </div>
+                        <p class="text-xs font-bold text-slate-700">ยังไม่มี Point Comment ในมุมมองนี้</p>
+                        <p class="text-[11px] text-slate-500">กดปุ่ม <span class="font-bold text-indigo-700">"📌 Debate จุดนี้"</span> ที่หัวข้อใดก็ได้ทางฝั่งซ้าย เพื่อสร้างกลุ่มประเด็นอภิปราย</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group points by node_id
+            const groupsMap = {};
+            filteredPoints.forEach(pt => {
+                if (!groupsMap[pt.node_id]) {
+                    groupsMap[pt.node_id] = {
+                        node_id: pt.node_id,
+                        node_label: pt.node_label,
+                        node_category: pt.node_category || 'ประเด็นทบทวน',
+                        items: []
+                    };
+                }
+                groupsMap[pt.node_id].items.push(pt);
+            });
+
+            const groups = Object.values(groupsMap);
+
+            container.innerHTML = groups.map(group => {
+                const safeLabel = group.node_label.replace(/'/g, "\\'");
+                return `
+                <div class="bg-white/70 backdrop-blur-md border border-white rounded-2xl p-3.5 shadow-sm space-y-2.5 transition-all">
+                    <!-- Group Node Header (Clickable to scroll & highlight target section) -->
+                    <div class="flex items-start justify-between gap-2 border-b border-slate-200/70 pb-2">
+                        <button type="button" onclick="scrollToNode('${group.node_id}')" class="text-left group flex items-start gap-2 cursor-pointer">
+                            <span class="mt-0.5 w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 text-white text-[11px] font-bold flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition">
+                                ${group.items.length}
+                            </span>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-wider text-cyan-700 block">${group.node_category}</span>
+                                <span class="text-xs font-extrabold text-slate-900 group-hover:text-indigo-700 underline-offset-2 group-hover:underline leading-snug block">
+                                    ${group.node_label}
+                                </span>
+                            </div>
+                        </button>
+                        <button type="button" onclick="openPointModal('${group.node_id}', '${safeLabel}', '${group.node_category}')" title="เพิ่มความเห็นในกลุ่มนี้" class="shrink-0 w-7 h-7 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white flex items-center justify-center text-xs transition cursor-pointer">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <!-- Branch Points List -->
+                    <div class="pl-3.5 border-l-2 border-cyan-400/70 space-y-2">
+                        ${group.items.map(pt => {
+                            const meta = POINT_TYPES[pt.point_type] || POINT_TYPES.suggestion;
+                            return `
+                            <div class="mapping-branch bg-white/85 border border-slate-200/80 rounded-xl p-2.5 text-xs space-y-1.5 shadow-2xs">
+                                <div class="flex flex-wrap items-center justify-between gap-1">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border ${meta.badgeClass}">
+                                        <span>${meta.icon}</span>
+                                        <span>${meta.label}</span>
+                                    </span>
+                                    <span class="text-[10px] text-slate-400">${pt.created_at || 'เมื่อสักครู่'}</span>
+                                </div>
+                                <p class="text-slate-800 leading-relaxed font-medium">${pt.text}</p>
+                                <div class="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                                    <span class="font-bold text-slate-600"><i class="fa-solid fa-user-doctor text-indigo-500 mr-1"></i>${pt.author}</span>
+                                    <button type="button" onclick="likePointComment('${pt.point_id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-cyan-100 text-slate-600 hover:text-cyan-800 font-bold transition cursor-pointer">
+                                        <i class="fa-solid fa-thumbs-up text-[10px]"></i>
+                                        <span>เห็นด้วย (${pt.likes || 0})</span>
+                                    </button>
+                                </div>
+                            </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
 
-        function submitDebateComment() {
-            const sec = document.getElementById('debateTargetSection').value || 'ทั่วไป';
-            const txt = document.getElementById('debateCommentText').value.trim();
-            if(!txt) return;
+        // Scroll & Highlight Target Section from Mapping Board
+        function scrollToNode(nodeId) {
+            const el = document.getElementById(nodeId);
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.classList.remove('highlight-pulse');
+            void el.offsetWidth; // trigger reflow
+            el.classList.add('highlight-pulse');
+        }
 
-            const stream = document.getElementById('debateCommentStream');
-            const item = document.createElement('div');
-            item.className = "bg-white p-3 rounded-xl border border-slate-200 shadow-2xs text-xs space-y-1";
-            item.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <span class="font-bold text-blue-800">[${sec}] โดย ทีม PCT / พยาบาล</span>
-                    <span class="text-[10px] text-slate-400">เพิ่งเมื่อครู่</span>
-                </div>
-                <p class="text-slate-700">${txt}</p>
-            `;
-            stream.appendChild(item);
-            document.getElementById('debateCommentText').value = '';
-            stream.scrollTop = stream.scrollHeight;
+        // Open Pin Point Modal
+        function openPointModal(nodeId, nodeLabel, nodeCategory) {
+            document.getElementById('pin_node_id').value = nodeId;
+            document.getElementById('pin_node_label').value = nodeLabel;
+            document.getElementById('pin_node_category').value = nodeCategory;
+            document.getElementById('pinModalNodeTitle').innerText = nodeLabel;
+            document.getElementById('pin_text').value = '';
+            document.getElementById('pointCommentModal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('pin_text').focus(), 100);
+        }
+
+        function closePointModal() {
+            document.getElementById('pointCommentModal').classList.add('hidden');
+        }
+
+        // Submit Point Comment & Update Mapping Group + Pin Badge Counts
+        async function handlePointCommentSubmit(e) {
+            e.preventDefault();
+            if (!currentActiveCase) return;
+
+            const nodeId = document.getElementById('pin_node_id').value;
+            const nodeLabel = document.getElementById('pin_node_label').value;
+            const nodeCategory = document.getElementById('pin_node_category').value;
+            const author = document.getElementById('pin_author').value.trim() || 'ทีม PCT';
+            const text = document.getElementById('pin_text').value.trim();
+            const pointType = document.querySelector('input[name="point_type"]:checked')?.value || 'suggestion';
+
+            if (!text) return;
+
+            const now = new Date();
+            const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} น.`;
+
+            const newPoint = {
+                point_id: 'PT-' + Date.now(),
+                node_id: nodeId,
+                node_label: nodeLabel,
+                node_category: nodeCategory,
+                point_type: pointType,
+                author: author,
+                text: text,
+                likes: 0,
+                created_at: timeStr
+            };
+
+            currentActiveCase.point_comments.push(newPoint);
+            closePointModal();
+
+            // Re-render view to update badge counts & mapping group
+            openFullpageDebate(currentActiveCase.case_id);
+            showToast(`ปักหมุดความเห็นลงกลุ่ม "${nodeLabel}" เรียบร้อยแล้ว`);
+
+            // Optional backend sync
+            try {
+                if (WEB_APP_URL && !WEB_APP_URL.includes("YOUR_")) {
+                    await fetch(WEB_APP_URL, {
+                        method: "POST",
+                        body: JSON.stringify({
+                            action: "addPointComment",
+                            case_id: currentActiveCase.case_id,
+                            point: newPoint
+                        })
+                    });
+                }
+            } catch (err) {}
+        }
+
+        function likePointComment(pointId) {
+            if (!currentActiveCase || !currentActiveCase.point_comments) return;
+            const pt = currentActiveCase.point_comments.find(p => p.point_id === pointId);
+            if (pt) {
+                pt.likes = (pt.likes || 0) + 1;
+                renderMappingGroups();
+            }
         }
 
         async function saveDebateRCAData() {
@@ -677,13 +1140,15 @@
                 due_date: document.getElementById('rca_due_date').value
             };
 
+            Object.assign(currentActiveCase, payload);
+
             try {
                 if(WEB_APP_URL && !WEB_APP_URL.includes("YOUR_")) {
                     await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
                 }
-                alert("บันทึกข้อมูลวิเคราะห์ 6Ms และ RCA เรียบร้อยแล้ว!");
+                showToast("บันทึกข้อมูลวิเคราะห์ 6Ms และ RCA เรียบร้อยแล้ว!");
             } catch(e) {
-                alert("บันทึกสำเร็จ (โหมด Demo)");
+                showToast("บันทึกข้อมูลวิเคราะห์ RCA เรียบร้อยแล้ว!");
             }
         }
 
@@ -708,8 +1173,21 @@
             document.getElementById('newCaseModal').classList.remove('hidden');
         }
 
-        async function deleteCase(caseId) {
-            if(!confirm("คุณต้องการลบกรณีศึกษานี้ออกจากฐานข้อมูลใช่หรือไม่?")) return;
+        function requestDeleteCase(caseId) {
+            pendingDeleteCaseId = caseId;
+            document.getElementById('confirmDeleteModal').classList.remove('hidden');
+            document.getElementById('btnConfirmDeleteExecute').onclick = executeDeleteCase;
+        }
+
+        function closeConfirmDelete() {
+            pendingDeleteCaseId = null;
+            document.getElementById('confirmDeleteModal').classList.add('hidden');
+        }
+
+        async function executeDeleteCase() {
+            if (!pendingDeleteCaseId) return;
+            const caseId = pendingDeleteCaseId;
+            closeConfirmDelete();
             
             try {
                 if(WEB_APP_URL && !WEB_APP_URL.includes("YOUR_")) {
@@ -718,9 +1196,12 @@
                 allCases = allCases.filter(c => c.case_id !== caseId);
                 updateSidebarCounts();
                 selectMenu(selectedModule, selectedSubMenu);
-                alert("ลบเคสเรียบร้อยแล้ว");
+                showToast("ลบกรณีศึกษาออกจากฐานข้อมูลเรียบร้อยแล้ว");
             } catch(e) {
-                alert("ลบสำเร็จ (โหมด Demo)");
+                allCases = allCases.filter(c => c.case_id !== caseId);
+                updateSidebarCounts();
+                selectMenu(selectedModule, selectedSubMenu);
+                showToast("ลบกรณีศึกษาเรียบร้อยแล้ว");
             }
         }
 
@@ -734,37 +1215,38 @@
             timelineCount++;
             const container = document.getElementById('timelineContainer');
             const row = document.createElement('div');
-            row.className = "bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-2";
+            row.className = "bg-white/70 border border-slate-200/80 p-3.5 rounded-2xl space-y-2";
             row.id = `tl_row_${timelineCount}`;
             row.innerHTML = `
                 <div class="flex justify-between items-center">
-                    <span class="text-xs font-bold text-slate-600">เหตุการณ์ที่ ${timelineCount}</span>
-                    <button type="button" onclick="removeTimelineRow(${timelineCount})" class="text-rose-500 text-xs font-semibold cursor-pointer">&times; ลบแถว</button>
+                    <span class="text-xs font-bold text-indigo-800">เหตุการณ์ที่ ${timelineCount}</span>
+                    <button type="button" onclick="removeTimelineRow(${timelineCount})" class="text-rose-500 hover:text-rose-700 text-xs font-semibold cursor-pointer">&times; ลบแถว</button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <div class="flex space-x-1">
-                        <input type="date" class="tl-date bg-white border border-slate-300 rounded-lg p-1.5 text-xs w-1/2">
-                        <input type="time" class="tl-time bg-white border border-slate-300 rounded-lg p-1.5 text-xs w-1/2">
+                        <input type="date" class="tl-date bg-white border border-slate-300 rounded-xl p-1.5 text-xs w-1/2">
+                        <input type="time" class="tl-time bg-white border border-slate-300 rounded-xl p-1.5 text-xs w-1/2">
                     </div>
-                    <select class="tl-location bg-white border border-slate-300 rounded-lg p-1.5 text-xs">
+                    <select class="tl-location bg-white border border-slate-300 rounded-xl p-1.5 text-xs">
                         <option value="IPDชาย">IPDชาย</option>
                         <option value="IPDหญิง">IPDหญิง</option>
                         <option value="ER">ER</option>
                         <option value="LR">LR</option>
                         <option value="อื่นๆ">อื่นๆ</option>
                     </select>
-                    <input type="text" class="tl-place-detail bg-white border border-slate-300 rounded-lg p-1.5 text-xs" placeholder="สถานที่ย่อย (ตึก IPD3)">
+                    <input type="text" class="tl-place-detail bg-white border border-slate-300 rounded-xl p-1.5 text-xs" placeholder="สถานที่ย่อย (ตึก IPD3)">
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <textarea class="tl-signs bg-white border border-slate-300 rounded-lg p-1.5 text-xs" rows="2" placeholder="อาการ + ตรวจร่างกาย + Vital Signs"></textarea>
-                    <textarea class="tl-mgmt bg-white border border-slate-300 rounded-lg p-1.5 text-xs" rows="2" placeholder="การรักษา / ยา / Lab / X-ray"></textarea>
+                    <textarea class="tl-signs bg-white border border-slate-300 rounded-xl p-2 text-xs" rows="2" placeholder="อาการ + ตรวจร่างกาย + Vital Signs"></textarea>
+                    <textarea class="tl-mgmt bg-white border border-slate-300 rounded-xl p-2 text-xs" rows="2" placeholder="การรักษา / ยา / Lab / X-ray"></textarea>
                 </div>
             `;
             container.appendChild(row);
         }
 
         function removeTimelineRow(id) {
-            document.getElementById(`tl_row_${id}`).remove();
+            const el = document.getElementById(`tl_row_${id}`);
+            if (el) el.remove();
         }
 
         function openNewCaseModal() {
@@ -784,7 +1266,10 @@
 
         async function handleFormSubmit(e) {
             e.preventDefault();
-            const caseId = document.getElementById('form_case_id').value || ("CASE-" + Date.now());
+            const existingId = document.getElementById('form_case_id').value;
+            const caseId = existingId || ("CASE-" + Date.now());
+            const existingCase = allCases.find(c => c.case_id === caseId);
+
             const deptSelect = document.getElementById('form_department').value;
             const deptFinal = deptSelect === 'อื่นๆ' ? document.getElementById('form_department_other').value : deptSelect;
 
@@ -805,6 +1290,7 @@
             });
 
             const caseData = {
+                ...(existingCase || {}),
                 action: "createCase",
                 case_id: caseId,
                 module_type: document.getElementById('form_module_type').value,
@@ -819,7 +1305,8 @@
                 review_date: document.getElementById('form_review_date').value,
                 strengths: document.getElementById('form_strengths').value,
                 weaknesses: document.getElementById('form_weaknesses').value,
-                timelines: timelines
+                timelines: timelines.length > 0 ? timelines : (existingCase?.timelines || []),
+                point_comments: existingCase?.point_comments || []
             };
 
             try {
@@ -833,9 +1320,9 @@
                 updateSidebarCounts();
                 selectMenu(selectedModule, selectedSubMenu);
                 closeNewCaseModal();
-                alert("บันทึกข้อมูลเรียบร้อยแล้ว!");
+                showToast("บันทึกข้อมูลกรณีศึกษาเรียบร้อยแล้ว!");
             } catch(err) {
-                alert("บันทึกสำเร็จ (โหมด Demo)");
+                showToast("บันทึกข้อมูลกรณีศึกษาเรียบร้อยแล้ว!");
             }
         }
 
@@ -850,16 +1337,57 @@
                     admit_datetime: "26/10/2569 20:10",
                     discharge_datetime: "30/10/2569 13:32",
                     primary_diagnosis: "#obstructive Jx DDX CHCA c #liver cirrhosis",
-                    complications: "Sepsis",
+                    complications: "Sepsis / Septic Shock",
                     reviewer_name: "ปราณี ตราเงิน",
                     review_date: "2026-11-04",
-                    strengths: "ดูแลประคับประคองดีมาก",
-                    weaknesses: "เพิ่มความถี่ V/S",
-                    timelines: [{ event_datetime: "26/10/2569 17:40 (ER)", clinical_signs: "BT 37.5, O2sat 89%", management: "On O2 mask" }]
+                    strengths: "ดูแลประคับประคองดีมาก สื่อสารกับญาติอย่างต่อเนื่อง",
+                    weaknesses: "เพิ่มความถี่การประเมิน V/S และ Early Warning Signs",
+                    m1_person: "การประเมินสัญญาณชีพช่วงเปลี่ยนเวรล่าช้าเล็กน้อย",
+                    m2_method: "ควรใช้แบบประเมิน SOS Score ซ้ำทุก 2 ชม. ในผู้ป่วยกลุ่มเสี่ยง Sepsis",
+                    timelines: [
+                        { event_datetime: "26/10/2569 17:40 (ER)", clinical_signs: "BT 37.5°C, PR 112 bpm, BP 98/60 mmHg, O2sat 89%", management: "On O2 mask 10 LPM, Load NSS 500 ml, เจาะ Hemoculture x2" },
+                        { event_datetime: "26/10/2569 20:10 (IPDชาย)", clinical_signs: "ซึมลงเล็กน้อย ตัวตาเหลืองมาก ปัสสาวะออกน้อย", management: "Admit IPDชาย, On Foley's cath monitor urine output hourly" }
+                    ],
+                    point_comments: [
+                        {
+                            point_id: "PT-101",
+                            node_id: "node-tl-0",
+                            node_label: "Timeline #1: 26/10/2569 17:40 (ER)",
+                            node_category: "Timeline",
+                            point_type: "risk",
+                            author: "นพ.ธนกร (องค์กรแพทย์)",
+                            text: "แรกรับที่ ER พบ O2sat 89% และ PR 112 เข้าเกณฑ์ Sepsis Fast Track ควรเปิด Sepsis Protocol ตั้งแต่ 15 นาทีแรก",
+                            likes: 4,
+                            created_at: "09:15 น."
+                        },
+                        {
+                            point_id: "PT-102",
+                            node_id: "node-tl-0",
+                            node_label: "Timeline #1: 26/10/2569 17:40 (ER)",
+                            node_category: "Timeline",
+                            point_type: "strength",
+                            author: "พว.สุดารัตน์ (หัวหน้างาน ER)",
+                            text: "ทีม ER เจาะ Hemoculture x2 ก่อนให้ยาปฏิชีวนะได้ครบถ้วนและรวดเร็ว",
+                            likes: 3,
+                            created_at: "09:22 น."
+                        },
+                        {
+                            point_id: "PT-103",
+                            node_id: "node-6m-2",
+                            node_label: "6Ms: 2. Method (วิธีการ/กระบวนการ)",
+                            node_category: "6Ms RCA",
+                            point_type: "suggestion",
+                            author: "ภก.กิตติพงษ์ (เภสัชกรรม)",
+                            text: "เสนอเพิ่ม Alert ในระบบ HOSxP เมื่อค่า SOS Score >= 4 ให้แจ้งเตือนแพทย์เวรและห้องยาทันที",
+                            likes: 6,
+                            created_at: "09:40 น."
+                        }
+                    ]
                 }
             ];
         }
 
+        // Initialize App
         fetchCases();
     </script>
 </body>

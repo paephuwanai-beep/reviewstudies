@@ -10,6 +10,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- jsPDF & html2canvas สำหรับสร้างไฟล์ A4 PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <style>
         body {
@@ -23,27 +26,27 @@
 
         /* Glassmorphism Utilities */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.76);
+            background: rgba(255, 255, 255, 0.78);
             backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 0 10px 35px -5px rgba(15, 23, 42, 0.06);
         }
         .glass-card {
-            background: rgba(255, 255, 255, 0.68);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(255, 255, 255, 0.85);
             box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
         }
         .glass-sidebar {
-            background: rgba(15, 23, 42, 0.9);
+            background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid rgba(255, 255, 255, 0.1);
         }
         .glass-bottom-nav {
-            background: rgba(255, 255, 255, 0.86);
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(22px);
             -webkit-backdrop-filter: blur(22px);
             border-top: 1px solid rgba(255, 255, 255, 0.95);
@@ -78,7 +81,7 @@
             transform: rotate(45deg);
         }
 
-        /* Highlight Pulse when jumping from Mapping Board */
+        /* Highlight Pulse */
         @keyframes highlightTarget {
             0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
             50% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); background-color: rgba(219, 234, 254, 0.9); }
@@ -88,11 +91,9 @@
             animation: highlightTarget 1.8s ease-out;
         }
 
-        /* Hide scrollbars cleanly where needed */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.45); border-radius: 99px; }
@@ -110,7 +111,7 @@
 </head>
 <body class="min-h-screen flex flex-col md:flex-row pb-24 md:pb-0">
 
-    <!-- Desktop Sidebar Navigation (ซ่อนบนมือถือ) -->
+    <!-- Desktop Sidebar Navigation -->
     <aside class="hidden md:flex w-72 glass-sidebar text-slate-100 flex-col justify-between shrink-0 shadow-2xl no-print z-40 sticky top-0 h-screen overflow-y-auto">
         <div>
             <!-- Brand Logo -->
@@ -130,6 +131,18 @@
                     <i class="fa-solid fa-file-medical"></i>
                     <span>+ บันทึกกรณีศึกษาใหม่</span>
                 </button>
+
+                <!-- Studios (ประวัติการอภิปราย) -->
+                <div class="space-y-1">
+                    <div class="text-xs font-bold uppercase tracking-wider text-indigo-300 px-3 pb-1 flex items-center space-x-2">
+                        <i class="fa-solid fa-award text-cyan-400"></i>
+                        <span>คลังข้อมูลที่อภิปรายแล้ว</span>
+                    </div>
+                    <button onclick="selectMenu('Studios', 'ทั้งหมด')" id="menu-Studios-ทั้งหมด" class="w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold text-cyan-200 hover:bg-white/10 border border-indigo-400/20 flex justify-between items-center cursor-pointer transition">
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-clapperboard text-cyan-400"></i> Studios (ประวัติการอภิปราย)</span>
+                        <span class="bg-indigo-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold" id="count-Studios-ทั้งหมด">0</span>
+                    </button>
+                </div>
 
                 <!-- Dead Category -->
                 <div class="space-y-1">
@@ -223,7 +236,7 @@
                     <div>
                         <div class="md:hidden text-[11px] font-bold text-indigo-600 leading-none">KS study studios</div>
                         <h2 id="currentCategoryTitle" class="text-base md:text-xl font-bold text-slate-900 leading-tight">Mortality Review (Dead): ทั้งหมด</h2>
-                        <p class="hidden md:block text-xs text-slate-500">ระบบทบทวนกรณีศึกษาทางคลินิกและวิเคราะห์สาเหตุเชิงลึก (Point-by-Point Mapping)</p>
+                        <p id="currentCategorySubtitle" class="hidden md:block text-xs text-slate-500">ระบบทบทวนกรณีศึกษาทางคลินิกและวิเคราะห์สาเหตุเชิงลึก (Point-by-Point Mapping)</p>
                     </div>
                 </div>
                 <button onclick="fetchCases(true)" title="รีเฟรชข้อมูล" class="md:hidden glass-card text-slate-700 w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer">
@@ -244,19 +257,20 @@
                 </div>
             </div>
 
-            <!-- Mobile Department Sub-pills (แถบเลือกแผนกบนมือถือ) -->
+            <!-- Mobile Department Sub-pills -->
             <div id="mobileDeptPills" class="flex md:hidden w-full overflow-x-auto no-scrollbar gap-1.5 pt-0.5">
-                ${['ทั้งหมด', 'IPDหญิง', 'IPDชาย', 'ER', 'LR', 'อื่นๆ'].map(dept => `
-                    <button onclick="selectMenu(selectedModule, '${dept}')" id="mob-pill-${dept}" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition ${dept === 'ทั้งหมด' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white/80 text-slate-600 border-white'}">
-                        ${dept}
-                    </button>
-                `).join('')}
+                <button onclick="selectMenu(selectedModule, 'ทั้งหมด')" id="mob-pill-ทั้งหมด" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-blue-600 text-white border-blue-600">ทั้งหมด</button>
+                <button onclick="selectMenu(selectedModule, 'IPDหญิง')" id="mob-pill-IPDหญิง" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-white/80 text-slate-600 border-white">IPDหญิง</button>
+                <button onclick="selectMenu(selectedModule, 'IPDชาย')" id="mob-pill-IPDชาย" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-white/80 text-slate-600 border-white">IPDชาย</button>
+                <button onclick="selectMenu(selectedModule, 'ER')" id="mob-pill-ER" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-white/80 text-slate-600 border-white">ER</button>
+                <button onclick="selectMenu(selectedModule, 'LR')" id="mob-pill-LR" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-white/80 text-slate-600 border-white">LR</button>
+                <button onclick="selectMenu(selectedModule, 'อื่นๆ')" id="mob-pill-อื่นๆ" class="shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-white/80 text-slate-600 border-white">อื่นๆ</button>
             </div>
         </header>
 
         <!-- Dynamic Content View -->
         <div class="p-4 md:p-6 flex-1" id="mainContainer">
-            <!-- ข้อ 3: แถบโหลดพร้อมเปอร์เซ็นต์ดาวน์โหลด -->
+            <!-- แถบโหลดพร้อมเปอร์เซ็นต์ดาวน์โหลด -->
             <div id="loadingBanner" class="hidden glass-panel rounded-3xl p-8 max-w-md mx-auto my-8 text-center space-y-4">
                 <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mx-auto shadow-inner">
                     <i class="fa-solid fa-cloud-arrow-down text-xl animate-bounce"></i>
@@ -281,40 +295,44 @@
         </div>
     </main>
 
-    <!-- ข้อ 5: Mobile Bottom Navigator Bar (แสดงเฉพาะบนมือถือ) -->
-    <nav class="md:hidden fixed bottom-0 inset-x-0 glass-bottom-nav z-40 px-2 py-2 no-print">
+    <!-- Mobile Bottom Navigator Bar -->
+    <nav class="md:hidden fixed bottom-0 inset-x-0 glass-bottom-nav z-40 px-1.5 py-2 no-print">
         <div class="max-w-md mx-auto grid grid-cols-5 items-center text-center">
-            <button onclick="selectMenu('Dead', selectedSubMenu)" id="mob-nav-Dead" class="flex flex-col items-center justify-center py-1 rounded-2xl text-blue-600 transition cursor-pointer">
+            <button onclick="selectMenu('Dead', selectedSubMenu)" id="mob-nav-Dead" class="flex flex-col items-center justify-center py-1 rounded-2xl text-rose-600 transition cursor-pointer">
                 <div class="relative">
-                    <i class="fa-solid fa-skull text-lg"></i>
+                    <i class="fa-solid fa-skull text-base"></i>
                     <span id="mob-badge-Dead" class="absolute -top-1.5 -right-3 bg-rose-500 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
                 </div>
-                <span class="text-[11px] font-bold mt-0.5">Dead</span>
+                <span class="text-[10px] font-bold mt-0.5">Dead</span>
             </button>
 
-            <button onclick="selectMenu('Refer', selectedSubMenu)" id="mob-nav-Refer" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-500 transition cursor-pointer">
+            <button onclick="selectMenu('Refer', selectedSubMenu)" id="mob-nav-Refer" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-400 transition cursor-pointer">
                 <div class="relative">
-                    <i class="fa-solid fa-ambulance text-lg"></i>
+                    <i class="fa-solid fa-ambulance text-base"></i>
                     <span id="mob-badge-Refer" class="absolute -top-1.5 -right-3 bg-amber-500 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
                 </div>
-                <span class="text-[11px] font-bold mt-0.5">Refer 24h</span>
+                <span class="text-[10px] font-bold mt-0.5">Refer</span>
             </button>
 
             <!-- ปุ่มกลาง Floating Add -->
             <div class="flex justify-center -mt-6">
-                <button onclick="openNewCaseModal()" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-600/35 flex items-center justify-center text-xl active:scale-95 transition cursor-pointer border-2 border-white">
+                <button onclick="openNewCaseModal()" class="w-13 h-13 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-600/35 flex items-center justify-center text-lg active:scale-95 transition cursor-pointer border-2 border-white">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
 
-            <button onclick="toggleMobileDeptSheet()" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-500 hover:text-blue-600 transition cursor-pointer">
-                <i class="fa-solid fa-hospital-user text-lg"></i>
-                <span class="text-[11px] font-bold mt-0.5 truncate max-w-[64px]" id="mob-nav-dept-label">ทั้งหมด</span>
+            <!-- เมนู Studios บนมือถือ -->
+            <button onclick="selectMenu('Studios', 'ทั้งหมด')" id="mob-nav-Studios" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-400 transition cursor-pointer">
+                <div class="relative">
+                    <i class="fa-solid fa-clapperboard text-base"></i>
+                    <span id="mob-badge-Studios" class="absolute -top-1.5 -right-3 bg-indigo-600 text-white text-[9px] font-bold px-1.5 rounded-full">0</span>
+                </div>
+                <span class="text-[10px] font-bold mt-0.5">Studios</span>
             </button>
 
-            <button onclick="scrollToMappingOnMobile()" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-500 hover:text-indigo-600 transition cursor-pointer">
-                <i class="fa-solid fa-diagram-project text-lg"></i>
-                <span class="text-[11px] font-bold mt-0.5">Mapping</span>
+            <button onclick="toggleMobileDeptSheet()" class="flex flex-col items-center justify-center py-1 rounded-2xl text-slate-500 hover:text-blue-600 transition cursor-pointer">
+                <i class="fa-solid fa-hospital-user text-base"></i>
+                <span class="text-[10px] font-bold mt-0.5 truncate max-w-[60px]" id="mob-nav-dept-label">ทั้งหมด</span>
             </button>
         </div>
     </nav>
@@ -328,15 +346,89 @@
                 <button onclick="toggleMobileDeptSheet()" class="text-slate-400 text-xl font-bold px-2">&times;</button>
             </div>
             <div class="grid grid-cols-2 gap-2.5 pb-4">
-                ${['ทั้งหมด', 'IPDหญิง', 'IPDชาย', 'ER', 'LR', 'อื่นๆ'].map(dept => `
-                    <button onclick="selectMenu(selectedModule, '${dept}'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center">
-                        <span>${dept}</span>
-                        <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
-                    </button>
-                `).join('')}
+                <button onclick="selectMenu(selectedModule, 'ทั้งหมด'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>ทั้งหมด</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
+                <button onclick="selectMenu(selectedModule, 'IPDหญิง'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>IPDหญิง</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
+                <button onclick="selectMenu(selectedModule, 'IPDชาย'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>IPDชาย</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
+                <button onclick="selectMenu(selectedModule, 'ER'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>ER</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
+                <button onclick="selectMenu(selectedModule, 'LR'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>LR</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
+                <button onclick="selectMenu(selectedModule, 'อื่นๆ'); toggleMobileDeptSheet();" class="p-3 rounded-2xl border border-slate-200 bg-white hover:bg-blue-50 text-left font-bold text-sm text-slate-800 flex justify-between items-center"><span>อื่นๆ</span><i class="fa-solid fa-chevron-right text-xs text-slate-400"></i></button>
             </div>
         </div>
     </div>
+
+    <!-- Modal: ยืนยันการบันทึกอภิปราย (Confirm Debate Completion Popup) -->
+    <div id="confirmDebateModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 hidden flex justify-center items-center p-4 no-print">
+        <div class="glass-panel bg-white/95 w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-white p-6 text-center space-y-5 animate-[fadeIn_0.2s_ease-out]">
+            <div class="w-16 h-16 rounded-3xl bg-gradient-to-br from-indigo-500 via-blue-600 to-cyan-500 text-white flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/30 text-2xl">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            
+            <div class="space-y-2">
+                <h3 class="text-xl font-bold text-slate-900">ยืนยันการบันทึกอภิปราย</h3>
+                <p class="text-sm text-slate-600 leading-relaxed bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 font-medium">
+                    "เมื่อกดยืนยัน แสดงว่าเคสนี้ ได้รับการศึกษาวิเคราะห์และอภิปรายแล้ว ท่านสามารถเข้าไปดูรายละเอียดได้ที่เมนู <strong class="text-indigo-700">Studios (ประวัติการอภิปราย)</strong>"
+                </p>
+            </div>
+
+            <div class="text-left space-y-1">
+                <label class="block text-xs font-bold text-slate-700">สรุปผล / ผู้รับรองการอภิปราย (ถ้ามี)</label>
+                <input type="text" id="confirm_approver_name" placeholder="เช่น ทีม PCT รพ.คอนสาร / นพ.สมชาย" class="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="flex gap-3 pt-1">
+                <button type="button" onclick="closeConfirmDebateModal()" class="flex-1 py-2.5 rounded-xl bg-slate-200/80 hover:bg-slate-300 text-slate-700 font-bold text-sm cursor-pointer transition">
+                    ยกเลิก
+                </button>
+                <button type="button" id="btnExecuteConfirmDebate" onclick="executeConfirmDebate()" class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-indigo-500/30 cursor-pointer transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-check-double"></i>
+                    <span>ยืนยัน</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: แสดงตัวอย่างและส่งออกไฟล์ PDF A4 แนวตั้ง + แชร์ -->
+    <div id="pdfPreviewModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 hidden flex flex-col justify-center items-center p-3 md:p-6 no-print">
+        <div class="glass-panel bg-white/95 w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden border border-white flex flex-col max-h-[92vh]">
+            <div class="p-4 md:p-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex flex-wrap justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/40 text-rose-300 flex items-center justify-center">
+                        <i class="fa-solid fa-file-pdf text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold leading-tight">เอกสารรายงานสรุปการอภิปราย (A4 แนวตั้ง)</h3>
+                        <p class="text-xs text-slate-300" id="pdfModalSubtitle">จัดหน้าอัตโนมัติไม่ตัดข้อความ รองรับหลายหน้า</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btnDownloadPDF" onclick="downloadGeneratedPDF()" class="bg-emerald-500 hover:bg-emerald-400 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-download"></i>
+                        <span>ดาวน์โหลด .PDF</span>
+                    </button>
+                    <button id="btnSharePDF" onclick="shareGeneratedPDF()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span>แชร์ไฟล์</span>
+                    </button>
+                    <button onclick="closePdfPreviewModal()" class="text-slate-300 hover:text-white text-2xl font-bold px-2 cursor-pointer">&times;</button>
+                </div>
+            </div>
+
+            <!-- สถานะกำลังสร้าง PDF -->
+            <div id="pdfGeneratingLoader" class="p-10 text-center space-y-3">
+                <i class="fa-solid fa-spinner fa-spin text-3xl text-indigo-600"></i>
+                <p class="text-sm font-bold text-slate-800">กำลังจัดหน้ากระดาษ A4 แนวตั้งและสร้างไฟล์ PDF...</p>
+                <p class="text-xs text-slate-500">ระบบกำลังจัดเรียงทุกหัวข้อไม่ให้ข้อความถูกตัดระหว่างหน้า</p>
+            </div>
+
+            <!-- พื้นที่แสดงตัวอย่าง PDF -->
+            <div id="pdfPreviewBody" class="hidden flex-1 overflow-y-auto bg-slate-200/80 p-4 flex flex-col items-center">
+                <iframe id="pdfPreviewIframe" class="w-full h-[68vh] rounded-2xl shadow-lg bg-white border border-slate-300"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offscreen A4 Report Template (สำหรับเรนเดอร์เป็น PDF ทีละบล็อกไม่ให้ข้อความโดนตัด) -->
+    <div id="a4RenderSandbox" style="position: fixed; left: -9999px; top: 0; width: 794px; background: #ffffff; color: #0f172a; font-family: 'Sarabun', sans-serif; z-index: -1;"></div>
 
     <!-- Floating Modal: ปักหมุด Debate เฉพาะจุด -->
     <div id="pointDebateModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4 no-print">
@@ -468,7 +560,6 @@
                             </div>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                            <!-- ข้อ 4: เปลี่ยนป้ายกำกับอัตโนมัติตาม Dead / Refer -->
                             <label id="label_outcome_datetime" class="block text-xs font-bold text-slate-700">วัน/เวลา เสียชีวิต</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <input type="date" id="form_discharge_date" class="bg-white border border-slate-300 rounded-lg p-2 text-sm">
@@ -500,7 +591,7 @@
                     </div>
                 </div>
 
-                <!-- ข้อ 1: Timeline Builder ที่บันทึกและกู้คืนข้อมูลครบถ้วน -->
+                <!-- Timeline Builder -->
                 <div class="bg-white p-5 rounded-2xl border border-slate-200 space-y-4">
                     <div class="flex justify-between items-center border-b pb-2">
                         <h4 class="text-sm font-bold text-emerald-800 uppercase tracking-wide">ลำดับ Timeline เหตุการณ์</h4>
@@ -543,6 +634,11 @@
         let currentActiveCase = null;
         let currentMappingFilter = 'ALL';
 
+        // เก็บ Blob และชื่อไฟล์ของ PDF ที่สร้างล่าสุดเพื่อดาวน์โหลดและแชร์
+        let currentPdfBlob = null;
+        let currentPdfFileName = 'KS-Study-Report.pdf';
+        let currentPdfBlobUrl = null;
+
         const TAG_META = {
             suggestion: { label: '💡 ข้อเสนอแนะ', badge: 'bg-cyan-100/90 text-cyan-800 border-cyan-300', bubble: 'bg-gradient-to-br from-cyan-50/95 to-white/95 border-cyan-200/90' },
             risk:       { label: '⚠️ จุดเสี่ยง',    badge: 'bg-amber-100/90 text-amber-800 border-amber-300', bubble: 'bg-gradient-to-br from-amber-50/95 to-white/95 border-amber-200/90' },
@@ -550,7 +646,6 @@
             question:   { label: '❓ คำถาม',      badge: 'bg-purple-100/90 text-purple-800 border-purple-300', bubble: 'bg-gradient-to-br from-purple-50/95 to-white/95 border-purple-200/90' }
         };
 
-        // ข้อ 4: สลับป้ายกำกับเวลาเสียชีวิต / เวลา Refer
         function updateOutcomeDateLabel() {
             const mod = document.getElementById('form_module_type').value;
             const lbl = document.getElementById('label_outcome_datetime');
@@ -575,7 +670,6 @@
             return dateStr;
         }
 
-        // แปลงวันที่ พ.ศ. (วว/ดด/2569) กลับเป็น YYYY-MM-DD สำหรับ input type="date" ตอนแก้ไข
         function parseThaiDateToISO(thaiStr) {
             if (!thaiStr) return '';
             const match = String(thaiStr).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -599,7 +693,6 @@
             } catch(e) { return 'เมื่อสักครู่'; }
         }
 
-        // ข้อ 1: ฟังก์ชันแปลงข้อมูล Timeline อย่างปลอดภัยป้องกันข้อมูลสูญหาย
         function normalizeTimelines(raw) {
             if (!raw) return [];
             if (Array.isArray(raw)) return raw;
@@ -607,9 +700,7 @@
                 try {
                     const parsed = JSON.parse(raw);
                     return Array.isArray(parsed) ? parsed : [];
-                } catch(e) {
-                    return [];
-                }
+                } catch(e) { return []; }
             }
             return [];
         }
@@ -617,15 +708,6 @@
         function toggleMobileDeptSheet() {
             const sheet = document.getElementById('mobileDeptSheet');
             if (sheet) sheet.classList.toggle('hidden');
-        }
-
-        function scrollToMappingOnMobile() {
-            const board = document.getElementById('pointMappingBoardContainer');
-            if (board && !document.getElementById('fullpageDebateView').classList.contains('hidden')) {
-                board.scrollIntoView({ behavior: 'smooth' });
-            } else {
-                alert('กรุณาเปิดดูเคสที่ต้องการเพื่อดู Point Mapping Board');
-            }
         }
 
         function selectMenu(module, subMenu) {
@@ -636,22 +718,34 @@
             document.getElementById('fullpageDebateView').classList.add('hidden');
             document.getElementById('caseGrid').classList.remove('hidden');
 
-            // Update Desktop Sidebar
+            // Reset Desktop Sidebar
             document.querySelectorAll('aside button[id^="menu-"]').forEach(btn => {
-                btn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer";
+                if (btn.id === 'menu-Studios-ทั้งหมด') {
+                    btn.className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold text-cyan-200 hover:bg-white/10 border border-indigo-400/20 flex justify-between items-center cursor-pointer transition";
+                } else {
+                    btn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium text-slate-300 hover:bg-white/10 flex justify-between items-center cursor-pointer";
+                }
             });
+
             const activeBtn = document.getElementById(`menu-${module}-${subMenu}`);
             if(activeBtn) {
-                activeBtn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium bg-blue-600/80 text-white flex justify-between items-center cursor-pointer shadow-sm";
+                if (module === 'Studios') {
+                    activeBtn.className = "w-full text-left px-3 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-indigo-600 to-blue-600 text-white border border-cyan-300/40 flex justify-between items-center cursor-pointer shadow-lg shadow-indigo-600/30";
+                } else {
+                    activeBtn.className = "w-full text-left px-3 py-1.5 rounded-xl text-sm font-medium bg-blue-600/80 text-white flex justify-between items-center cursor-pointer shadow-sm";
+                }
             }
 
             // Update Mobile Bottom Nav & Pills
             const mobDead = document.getElementById('mob-nav-Dead');
             const mobRefer = document.getElementById('mob-nav-Refer');
-            if (mobDead && mobRefer) {
+            const mobStudios = document.getElementById('mob-nav-Studios');
+            if (mobDead && mobRefer && mobStudios) {
                 mobDead.className = `flex flex-col items-center justify-center py-1 rounded-2xl transition cursor-pointer ${module === 'Dead' ? 'text-rose-600' : 'text-slate-400'}`;
                 mobRefer.className = `flex flex-col items-center justify-center py-1 rounded-2xl transition cursor-pointer ${module === 'Refer' ? 'text-amber-600' : 'text-slate-400'}`;
+                mobStudios.className = `flex flex-col items-center justify-center py-1 rounded-2xl transition cursor-pointer ${module === 'Studios' ? 'text-indigo-600' : 'text-slate-400'}`;
             }
+
             const mobDeptLabel = document.getElementById('mob-nav-dept-label');
             if (mobDeptLabel) mobDeptLabel.innerText = subMenu;
 
@@ -663,11 +757,17 @@
                 activePill.className = "shrink-0 px-3 py-1 rounded-full text-xs font-bold border transition bg-blue-600 text-white border-blue-600 shadow-xs";
             }
 
-            document.getElementById('currentCategoryTitle').innerText = `${module === 'Dead' ? 'Mortality Review (Dead)' : 'Refer in 24 ชม.'}: ${subMenu}`;
+            if (module === 'Studios') {
+                document.getElementById('currentCategoryTitle').innerText = `Studios (ประวัติการอภิปราย): ${subMenu}`;
+                document.getElementById('currentCategorySubtitle').innerText = `คลังกรณีศึกษาที่ผ่านการวิเคราะห์และยืนยันการอภิปรายแล้ว พร้อมส่งออกรายงาน A4 PDF`;
+            } else {
+                document.getElementById('currentCategoryTitle').innerText = `${module === 'Dead' ? 'Mortality Review (Dead)' : 'Refer in 24 ชม.'}: ${subMenu}`;
+                document.getElementById('currentCategorySubtitle').innerText = `ระบบทบทวนกรณีศึกษาทางคลินิกและวิเคราะห์สาเหตุเชิงลึก (Point-by-Point Mapping)`;
+            }
+
             renderCases();
         }
 
-        // ข้อ 3: แถบเปอร์เซ็นต์ดาวน์โหลดและดึงข้อมูลแบบ Realtime
         async function fetchCases(showBanner = false) {
             const syncIcon = document.getElementById('syncIcon');
             const syncIconMob = document.getElementById('syncIconMobile');
@@ -707,7 +807,10 @@
                 allCases = (Array.isArray(data) ? data : []).map(c => ({
                     ...c,
                     timelines: normalizeTimelines(c.timelines),
-                    comments: Array.isArray(c.comments) ? c.comments : []
+                    comments: Array.isArray(c.comments) ? c.comments : [],
+                    debate_status: c.debate_status || (c.rca_data && c.rca_data.debate_status) || 'Pending',
+                    confirmed_at: c.confirmed_at || (c.rca_data && c.rca_data.confirmed_at) || '',
+                    confirmed_by: c.confirmed_by || (c.rca_data && c.rca_data.confirmed_by) || ''
                 }));
                 
                 updateSidebarCounts();
@@ -752,6 +855,13 @@
                     }
                 });
             });
+
+            // นับจำนวนเคสที่ยืนยันการอภิปรายแล้วในเมนู Studios
+            const studiosCount = allCases.filter(c => c.debate_status === 'Completed').length;
+            const sBadge = document.getElementById('count-Studios-ทั้งหมด');
+            if(sBadge) sBadge.innerText = studiosCount;
+            const mobSBadge = document.getElementById('mob-badge-Studios');
+            if(mobSBadge) mobSBadge.innerText = studiosCount;
         }
 
         function renderCases() {
@@ -759,7 +869,9 @@
             const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
 
             const filtered = allCases.filter(c => {
-                let matchMod = c.module_type === selectedModule;
+                let matchMod = selectedModule === 'Studios'
+                    ? c.debate_status === 'Completed'
+                    : c.module_type === selectedModule;
                 let matchSub = selectedSubMenu === 'ทั้งหมด' || c.department === selectedSubMenu || (selectedSubMenu === 'อื่นๆ' && !['IPDหญิง', 'IPDชาย', 'ER', 'LR'].includes(c.department));
                 let matchKey = String(c.hn || '').toLowerCase().includes(keyword) || String(c.an || '').toLowerCase().includes(keyword) || String(c.primary_diagnosis || '').toLowerCase().includes(keyword);
                 return matchMod && matchSub && matchKey;
@@ -768,8 +880,8 @@
             if(filtered.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full glass-panel rounded-3xl p-12 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-4xl mb-3 text-slate-300"></i>
-                        <p class="text-sm font-semibold">ไม่พบข้อมูลกรณีศึกษาในหมวดนี้</p>
+                        <i class="fa-solid ${selectedModule === 'Studios' ? 'fa-clapperboard' : 'fa-folder-open'} text-4xl mb-3 text-slate-300"></i>
+                        <p class="text-sm font-semibold">${selectedModule === 'Studios' ? 'ยังไม่มีรายการเคสที่ยืนยันการอภิปรายใน Studios' : 'ไม่พบข้อมูลกรณีศึกษาในหมวดนี้'}</p>
                     </div>
                 `;
                 return;
@@ -778,13 +890,18 @@
             grid.innerHTML = filtered.map(c => {
                 const cmtCount = (c.comments || []).length;
                 const tlCount = (c.timelines || []).length;
+                const isCompleted = c.debate_status === 'Completed';
+
                 return `
-                <div class="glass-panel rounded-3xl p-5 hover:shadow-xl transition flex flex-col justify-between space-y-4">
+                <div class="glass-panel rounded-3xl p-5 hover:shadow-xl transition flex flex-col justify-between space-y-4 ${isCompleted ? 'border-indigo-300/80' : ''}">
                     <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs font-bold px-3 py-1 rounded-full ${c.module_type === 'Dead' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">
-                                ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต' : 'Refer in 24 ชม.'}
-                            </span>
+                        <div class="flex flex-wrap justify-between items-start gap-1.5 mb-2">
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-xs font-bold px-3 py-1 rounded-full ${c.module_type === 'Dead' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">
+                                    ${c.module_type === 'Dead' ? 'ผู้ป่วยเสียชีวิต' : 'Refer in 24 ชม.'}
+                                </span>
+                                ${isCompleted ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-circle-check mr-1"></i>อภิปรายแล้ว</span>` : ''}
+                            </div>
                             <div class="flex items-center gap-1.5">
                                 ${cmtCount > 0 ? `<span class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full"><i class="fa-solid fa-map-pin mr-1"></i>${cmtCount}</span>` : ''}
                                 <span class="text-xs text-slate-600 font-medium bg-white/80 px-2.5 py-0.5 rounded-lg border border-slate-200/60">${c.department || 'IPD'}</span>
@@ -800,14 +917,23 @@
                                 <span><i class="fa-solid fa-calendar-day mr-1 text-blue-500"></i> ทบทวน: ${formatThaiDate(c.review_date)}</span>
                                 <span class="text-emerald-700 font-semibold"><i class="fa-solid fa-clock-rotate-left mr-1"></i>${tlCount} Timeline</span>
                             </div>
+                            ${isCompleted && c.confirmed_at ? `<div class="text-indigo-700 font-semibold pt-0.5"><i class="fa-solid fa-award mr-1"></i>ยืนยันเมื่อ: ${formatThaiDate(c.confirmed_at)}</div>` : ''}
                         </div>
                     </div>
 
                     <div class="pt-2 border-t border-slate-200/60 flex flex-col gap-2">
-                        <button onclick="openFullpageDebate('${c.case_id}')" class="w-full bg-gradient-to-r from-slate-800 to-blue-900 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 rounded-2xl text-sm font-semibold transition flex items-center justify-center space-x-2 cursor-pointer shadow-md">
-                            <i class="fa-solid fa-comments"></i>
-                            <span>เปิดดูข้อมูล & Debate เต็มหน้า</span>
-                        </button>
+                        <div class="flex gap-2">
+                            <button onclick="openFullpageDebate('${c.case_id}')" class="flex-1 bg-gradient-to-r from-slate-800 to-blue-900 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 px-3 rounded-2xl text-xs sm:text-sm font-semibold transition flex items-center justify-center space-x-1.5 cursor-pointer shadow-md">
+                                <i class="fa-solid fa-comments"></i>
+                                <span>${selectedModule === 'Studios' ? 'ดูรายละเอียดอภิปราย' : 'เปิดดู & Debate'}</span>
+                            </button>
+                            ${selectedModule === 'Studios' ? `
+                                <button onclick="exportCaseToA4PDF('${c.case_id}')" title="ส่งออกไฟล์ PDF A4 แนวตั้ง" class="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-3.5 py-2.5 rounded-2xl text-xs font-bold shadow-md cursor-pointer flex items-center gap-1.5 transition shrink-0">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <span>ส่งออก PDF</span>
+                                </button>
+                            ` : ''}
+                        </div>
                         <div class="flex justify-end space-x-3 text-xs px-1">
                             <button onclick="openEditCase('${c.case_id}')" class="text-amber-600 hover:underline cursor-pointer font-semibold"><i class="fa-solid fa-pen"></i> แก้ไข</button>
                             <span class="text-slate-300">|</span>
@@ -818,7 +944,6 @@
             `}).join('');
         }
 
-        // กล่องความคิดลอย (Inline Floating Thought Bubbles) ตรงจุดที่มี Debate
         function renderInlineThoughtBubbles(targetId) {
             const comments = (currentActiveCase?.comments || []).filter(cm => cm.target_id === targetId);
             if (comments.length === 0) return '';
@@ -907,7 +1032,6 @@
             `;
         }
 
-        // ข้อ 2: แบ่งเป็น 2 หน้าจอ (ซ้าย: รายละเอียดเคส & Timeline & 6Ms / ขวา: Point Mapping Board แบบ Sticky ติดหน้าจอตลอดเวลา)
         function openFullpageDebate(caseId) {
             const c = allCases.find(item => String(item.case_id) === String(caseId));
             if(!c) return;
@@ -916,6 +1040,7 @@
             const rca = c.rca_data || {};
             const timelines = normalizeTimelines(c.timelines);
             const outcomeLabel = c.module_type === 'Refer' ? 'Refer' : 'เสียชีวิต';
+            const isCompleted = c.debate_status === 'Completed';
 
             document.getElementById('caseGrid').classList.add('hidden');
             const view = document.getElementById('fullpageDebateView');
@@ -924,31 +1049,54 @@
             view.innerHTML = `
                 <!-- Header Toolbar -->
                 <div class="glass-panel p-3.5 md:p-4 rounded-2xl flex flex-wrap justify-between items-center gap-3 mb-5 no-print">
-                    <button onclick="selectMenu('${c.module_type}', '${selectedSubMenu}')" class="text-slate-700 hover:text-blue-700 font-bold text-sm flex items-center space-x-2 cursor-pointer">
+                    <button onclick="selectMenu('${selectedModule}', '${selectedSubMenu}')" class="text-slate-700 hover:text-blue-700 font-bold text-sm flex items-center space-x-2 cursor-pointer">
                         <i class="fa-solid fa-arrow-left"></i>
                         <span>กลับไปรายการเคส</span>
                     </button>
                     
                     <div class="flex flex-wrap items-center gap-2">
-                        <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                        <button onclick="exportCaseToA4PDF('${c.case_id}')" class="bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-400 hover:to-pink-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer shadow-sm">
                             <i class="fa-solid fa-file-pdf"></i>
-                            <span>พิมพ์ / PDF</span>
+                            <span>ส่งออก PDF (A4 แนวตั้ง)</span>
+                        </button>
+                        <button onclick="openConfirmDebateModal()" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>${isCompleted ? 'อภิปรายแล้ว (อัปเดตยืนยัน)' : 'ยืนยันการบันทึกอภิปราย'}</span>
                         </button>
                         <button onclick="openEditCase('${c.case_id}')" class="bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                             <i class="fa-solid fa-pen"></i>
                             <span>แก้ไขเคส</span>
                         </button>
-                        <button onclick="deleteCase('${c.case_id}')" class="bg-rose-500 hover:bg-rose-600 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                        <button onclick="deleteCase('${c.case_id}')" class="bg-slate-700 hover:bg-slate-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                             <i class="fa-solid fa-trash"></i>
                             <span>ลบ</span>
                         </button>
                     </div>
                 </div>
 
+                <!-- แถบสถานะหากเคสนี้ได้รับการยืนยันใน Studios แล้ว -->
+                ${isCompleted ? `
+                    <div class="glass-panel bg-emerald-50/80 border border-emerald-300 rounded-2xl p-4 mb-5 flex flex-wrap justify-between items-center gap-3 no-print">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                <i class="fa-solid fa-award text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-emerald-950">เคสนี้ได้รับการยืนยันการศึกษาวิเคราะห์และอภิปรายเรียบร้อยแล้ว</div>
+                                <div class="text-xs text-emerald-800">บันทึกในเมนู <strong>Studios (ประวัติการอภิปราย)</strong> ${c.confirmed_at ? `เมื่อวันที่ ${formatThaiDate(c.confirmed_at)}` : ''} ${c.confirmed_by ? `โดย ${c.confirmed_by}` : ''}</div>
+                            </div>
+                        </div>
+                        <button onclick="exportCaseToA4PDF('${c.case_id}')" class="bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-export"></i>
+                            <span>ส่งออก / แชร์ไฟล์ PDF</span>
+                        </button>
+                    </div>
+                ` : ''}
+
                 <!-- Split 2-Column Layout -->
                 <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start print-full">
                     
-                    <!-- คอลัมน์ซ้าย (7 ส่วน): ข้อมูลผู้ป่วย + Timeline + 6Ms + Action Plan -->
+                    <!-- คอลัมน์ซ้าย (7 ส่วน) -->
                     <div class="xl:col-span-7 space-y-6">
                         
                         <!-- Section 1: ข้อมูลผู้ป่วย -->
@@ -1049,7 +1197,7 @@
                             </div>
                         </div>
 
-                        <!-- Section 4: มาตรการแก้ไข 3 ระดับ -->
+                        <!-- Section 4: มาตรการแก้ไข 3 ระดับ & ปุ่มยืนยันการบันทึกอภิปราย -->
                         <div class="glass-panel p-5 md:p-6 rounded-3xl space-y-4">
                             <h4 class="text-base font-bold text-slate-900 border-b border-slate-200/70 pb-3 flex items-center space-x-2">
                                 <i class="fa-solid fa-list-check text-emerald-600"></i>
@@ -1096,20 +1244,372 @@
                                 </div>
                             </div>
 
-                            <div class="text-right pt-2 no-print">
-                                <button onclick="saveDebateRCAData()" id="btnSaveRCA" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md cursor-pointer">
-                                    <i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลวิเคราะห์ RCA & 6Ms
+                            <!-- แถบปุ่มบันทึก RCA และปุ่มยืนยันการบันทึกอภิปราย -->
+                            <div class="flex flex-wrap justify-end items-center gap-3 pt-4 border-t border-slate-200/70 no-print">
+                                <button onclick="saveDebateRCAData(false)" id="btnSaveRCA" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md cursor-pointer flex items-center gap-1.5">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>บันทึกร่าง RCA & 6Ms</span>
+                                </button>
+                                <button onclick="openConfirmDebateModal()" class="bg-gradient-to-r from-indigo-600 via-blue-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-indigo-500/30 cursor-pointer flex items-center gap-2 transition">
+                                    <i class="fa-solid fa-circle-check text-base"></i>
+                                    <span>ยืนยันการบันทึกอภิปราย</span>
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ข้อ 2: คอลัมน์ขวา (5 ส่วน): Sticky Point Mapping Board แสดงค้างอยู่ด้านขวาเสมอแม้เลื่อนหน้าจอ -->
+                    <!-- คอลัมน์ขวา (5 ส่วน): Sticky Point Mapping Board -->
                     <div id="pointMappingBoardContainer" class="xl:col-span-5 xl:sticky xl:top-24 xl:max-h-[calc(100vh-7rem)] xl:overflow-y-auto pr-0.5 sticky-board">
                         ${renderPointMappingBoard()}
                     </div>
                 </div>
             `;
+        }
+
+        // เปิดป็อปอัพยืนยันการบันทึกอภิปราย
+        function openConfirmDebateModal() {
+            if (!currentActiveCase) return;
+            document.getElementById('confirm_approver_name').value = currentActiveCase.confirmed_by || currentActiveCase.reviewer_name || '';
+            document.getElementById('confirmDebateModal').classList.remove('hidden');
+        }
+
+        function closeConfirmDebateModal() {
+            document.getElementById('confirmDebateModal').classList.add('hidden');
+        }
+
+        // กดยืนยันในป็อปอัพ -> บันทึก RCA ล่าสุด + เปลี่ยนสถานะเป็น Completed ลง Google Sheets + ย้ายไปเมนู Studios
+        async function executeConfirmDebate() {
+            if (!currentActiveCase) return;
+            const btn = document.getElementById('btnExecuteConfirmDebate');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังยืนยัน...</span>`;
+
+            const approver = document.getElementById('confirm_approver_name').value.trim() || 'ทีม PCT โรงพยาบาลคอนสาร';
+            const confirmedAt = new Date().toISOString();
+
+            // รวบรวมข้อมูล RCA ล่าสุดจากหน้าจอด้วย (หากเปิดหน้าอภิปรายอยู่)
+            const rcaObj = {
+                m1_person: document.getElementById('rca_m1') ? document.getElementById('rca_m1').value : (currentActiveCase.rca_data?.m1_person || ''),
+                m2_method: document.getElementById('rca_m2') ? document.getElementById('rca_m2').value : (currentActiveCase.rca_data?.m2_method || ''),
+                m3_machine: document.getElementById('rca_m3') ? document.getElementById('rca_m3').value : (currentActiveCase.rca_data?.m3_machine || ''),
+                m4_material: document.getElementById('rca_m4') ? document.getElementById('rca_m4').value : (currentActiveCase.rca_data?.m4_material || ''),
+                m5_management: document.getElementById('rca_m5') ? document.getElementById('rca_m5').value : (currentActiveCase.rca_data?.m5_management || ''),
+                m6_environment: document.getElementById('rca_m6') ? document.getElementById('rca_m6').value : (currentActiveCase.rca_data?.m6_environment || ''),
+                proximate_cause: document.getElementById('rca_proximate_cause') ? document.getElementById('rca_proximate_cause').value : (currentActiveCase.rca_data?.proximate_cause || ''),
+                correction: document.getElementById('rca_correction') ? document.getElementById('rca_correction').value : (currentActiveCase.rca_data?.correction || ''),
+                corrective_action: document.getElementById('rca_corrective') ? document.getElementById('rca_corrective').value : (currentActiveCase.rca_data?.corrective_action || ''),
+                preventive_action: document.getElementById('rca_preventive') ? document.getElementById('rca_preventive').value : (currentActiveCase.rca_data?.preventive_action || ''),
+                responsible_person: document.getElementById('rca_responsible') ? document.getElementById('rca_responsible').value : (currentActiveCase.rca_data?.responsible_person || ''),
+                due_date: document.getElementById('rca_due_date') ? document.getElementById('rca_due_date').value : (currentActiveCase.rca_data?.due_date || ''),
+                debate_status: 'Completed',
+                confirmed_at: confirmedAt,
+                confirmed_by: approver
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'confirmDebateCase',
+                        case_id: currentActiveCase.case_id,
+                        debate_status: 'Completed',
+                        confirmed_at: confirmedAt,
+                        confirmed_by: approver,
+                        ...rcaObj
+                    })
+                });
+
+                currentActiveCase.rca_data = rcaObj;
+                currentActiveCase.debate_status = 'Completed';
+                currentActiveCase.confirmed_at = confirmedAt;
+                currentActiveCase.confirmed_by = approver;
+
+                updateSidebarCounts();
+                closeConfirmDebateModal();
+                // พาไปยังเมนู Studios (ประวัติการอภิปราย) ทันที
+                selectMenu('Studios', 'ทั้งหมด');
+            } catch (err) {
+                alert("เกิดข้อผิดพลาดในการยืนยันข้อมูล กรุณาลองใหม่อีกครั้ง");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check-double"></i> <span>ยืนยัน</span>`;
+            }
+        }
+
+        // สร้างไฟล์ PDF ขนาด A4 แนวตั้ง ครบทุกรายการ ไม่ตัดข้อความ และรองรับหลายหน้า
+        async function exportCaseToA4PDF(caseId) {
+            const c = allCases.find(item => String(item.case_id) === String(caseId));
+            if (!c) return;
+
+            const rca = c.rca_data || {};
+            const timelines = normalizeTimelines(c.timelines);
+            const comments = c.comments || [];
+            const outcomeLabel = c.module_type === 'Refer' ? 'วัน/เวลา Refer' : 'วัน/เวลา เสียชีวิต';
+
+            // เปิด Modal แสดงสถานะ
+            document.getElementById('pdfModalSubtitle').innerText = `HN: ${c.hn} (${c.department}) • ขนาด A4 แนวตั้ง`;
+            document.getElementById('pdfGeneratingLoader').classList.remove('hidden');
+            document.getElementById('pdfPreviewBody').classList.add('hidden');
+            document.getElementById('pdfPreviewModal').classList.remove('hidden');
+
+            // จัดกลุ่มคอมเมนต์ตามจุด
+            const groupedComments = {};
+            comments.forEach(cm => {
+                if (!groupedComments[cm.target_id]) {
+                    groupedComments[cm.target_id] = { label: cm.target_point, list: [] };
+                }
+                groupedComments[cm.target_id].list.push(cm);
+            });
+
+            // สร้างบล็อกเนื้อหาแต่ละส่วน (แต่ละ .pdf-block จะถูกวัดความสูงและขึ้นหน้าใหม่หากไม่พอในหน้านั้น เพื่อไม่ให้ข้อความโดนตัด)
+            const sandbox = document.getElementById('a4RenderSandbox');
+            sandbox.innerHTML = `
+                <!-- Block 1: Header & ข้อมูลผู้ป่วย -->
+                <div class="pdf-block" style="padding: 18px 24px; background: #fff;">
+                    <div style="border-bottom: 2px solid #1e3a8a; padding-bottom: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div>
+                            <div style="font-size: 11px; font-weight: 700; color: #2563eb; letter-spacing: 0.5px;">KS STUDY STUDIOS • ทีม PCT โรงพยาบาลคอนสาร</div>
+                            <h1 style="font-size: 20px; font-weight: 700; color: #0f172a; margin: 2px 0 0 0;">รายงานสรุปการทบทวนกรณีศึกษาทางคลินิก (Clinical Case Review)</h1>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="display: inline-block; padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; background: ${c.module_type === 'Dead' ? '#ffe4e6' : '#fef3c7'}; color: ${c.module_type === 'Dead' ? '#be123c' : '#92400e'};">
+                                ${c.module_type === 'Dead' ? 'Mortality Review (Dead)' : 'Refer in 24 ชม.'}
+                            </span>
+                            <div style="font-size: 11px; color: #475569; margin-top: 4px;">สถานะ: <strong>${c.debate_status === 'Completed' ? 'อภิปรายและรับรองแล้ว' : 'อยู่ระหว่างทบทวน'}</strong></div>
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.6;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div><strong>เลขที่เวชระเบียน (HN):</strong> ${c.hn}</div>
+                            <div><strong>เลขที่ Admit (AN):</strong> ${c.an || '-'}</div>
+                            <div><strong>แผนก/หน่วยงาน:</strong> ${c.department || '-'}</div>
+                            <div><strong>วันที่ทบทวนเคส:</strong> ${formatThaiDate(c.review_date)}</div>
+                            <div><strong>วัน/เวลา Admit:</strong> ${c.admit_datetime || '-'}</div>
+                            <div><strong>${outcomeLabel}:</strong> ${c.discharge_datetime || '-'}</div>
+                            <div><strong>ผู้บันทึก/ทบทวน:</strong> ${c.reviewer_name || '-'}</div>
+                            <div><strong>ผู้รับรองการอภิปราย:</strong> ${c.confirmed_by || '-'}</div>
+                        </div>
+                        <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #cbd5e1;">
+                            <div><strong>การวินิจฉัยโรคหลัก (Primary Diagnosis):</strong> ${c.primary_diagnosis || '-'}</div>
+                            <div style="margin-top: 4px;"><strong>ภาวะแทรกซ้อน (Complications):</strong> ${c.complications || '-'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Block 2: หัวข้อ Clinical Timeline -->
+                <div class="pdf-block" style="padding: 8px 24px 4px 24px; background: #fff;">
+                    <h2 style="font-size: 15px; font-weight: 700; color: #065f46; border-left: 4px solid #10b981; padding-left: 10px; margin: 0;">
+                        1. ลำดับเหตุการณ์ทางคลินิก (Clinical Timeline) (${timelines.length} ช่วงเวลา)
+                    </h2>
+                </div>
+
+                <!-- Block 2.x: แยก Timeline ทีละเหตุการณ์เพื่อให้ขึ้นหน้าใหม่ได้อัตโนมัติไม่โดนตัด -->
+                ${timelines.length === 0 ? `
+                    <div class="pdf-block" style="padding: 6px 24px; background: #fff;">
+                        <div style="padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 12px; color: #64748b;">ไม่มีข้อมูลลำดับเหตุการณ์</div>
+                    </div>
+                ` : timelines.map((t, idx) => `
+                    <div class="pdf-block" style="padding: 5px 24px; background: #fff;">
+                        <div style="border: 1px solid #d1fae5; background: #f0fdf4; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55;">
+                            <div style="font-weight: 700; color: #047857; margin-bottom: 3px;">เหตุการณ์ที่ ${idx + 1} : ${t.event_datetime || '-'}</div>
+                            <div><strong>อาการ/ตรวจร่างกาย/VS:</strong> ${t.clinical_signs || '-'}</div>
+                            <div><strong>การดูแล/ยา/Lab/X-ray:</strong> ${t.management || '-'}</div>
+                        </div>
+                    </div>
+                `).join('')}
+
+                <!-- Block 3: การวิเคราะห์สาเหตุเชิงลึก 6Ms & Proximate Cause -->
+                <div class="pdf-block" style="padding: 12px 24px 6px 24px; background: #fff;">
+                    <h2 style="font-size: 15px; font-weight: 700; color: #1e40af; border-left: 4px solid #3b82f6; padding-left: 10px; margin: 0 0 8px 0;">
+                        2. แผนผังวิเคราะห์ปัจจัยสาเหตุ (6Ms RCA Analysis)
+                    </h2>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.5;">
+                        <tr>
+                            <td style="width: 32%; border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">1. Man/Person (คน/บุคลากร)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m1_person || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">2. Method (วิธีการ/กระบวนการ)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m2_method || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">3. Machine/Equipment (เครื่องมือ)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m3_machine || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">4. Material (วัสดุ/ยา/ข้อมูล)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m4_material || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">5. Management/System (ระบบจัดการ)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m5_management || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">6. Environment (สภาพแวดล้อม)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.m6_environment || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #fcd34d; background: #fffbeb; padding: 8px 10px; font-weight: 700; color: #92400e;">สาเหตุที่เกิดขึ้นจริง (Proximate Cause)</td>
+                            <td style="border: 1px solid #fcd34d; background: #fffbeb; padding: 8px 10px; font-weight: 600;">${rca.proximate_cause || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Block 4: มาตรการแก้ไข 3 ระดับ (Action Plan) -->
+                <div class="pdf-block" style="padding: 12px 24px 6px 24px; background: #fff;">
+                    <h2 style="font-size: 15px; font-weight: 700; color: #065f46; border-left: 4px solid #059669; padding-left: 10px; margin: 0 0 8px 0;">
+                        3. ข้อเสนอแนะและมาตรการแก้ไข 3 ระดับ (Action Plan)
+                    </h2>
+                    <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; line-height: 1.5;">
+                        <tr>
+                            <td style="width: 32%; border: 1px solid #cbd5e1; background: #fffbeb; padding: 7px 10px; font-weight: 700;">1. การแก้ไขเฉพาะหน้า (Correction)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.correction || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #eff6ff; padding: 7px 10px; font-weight: 700;">2. การแก้ไขที่รากเหง้า (Corrective Action)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.corrective_action || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #ecfdf5; padding: 7px 10px; font-weight: 700;">3. การป้องกัน (Preventive Action)</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">${rca.preventive_action || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #cbd5e1; background: #f8fafc; padding: 7px 10px; font-weight: 700;">ผู้รับผิดชอบ / กำหนดเสร็จ</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 7px 10px;">ผู้รับผิดชอบ: <strong>${rca.responsible_person || '-'}</strong> | กำหนดเสร็จ: <strong>${formatThaiDate(rca.due_date)}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Block 5: หัวข้อ Point-by-Point Debate -->
+                <div class="pdf-block" style="padding: 12px 24px 4px 24px; background: #fff;">
+                    <h2 style="font-size: 15px; font-weight: 700; color: #3730a3; border-left: 4px solid #4f46e5; padding-left: 10px; margin: 0;">
+                        4. สรุปประเด็นอภิปรายรายจุด (Point-by-Point Mapping Debate) (${comments.length} รายการ)
+                    </h2>
+                </div>
+
+                <!-- Block 5.x: แยกทีละกลุ่มจุดอภิปราย เพื่อไม่ให้ข้อความโดนตัด -->
+                ${Object.keys(groupedComments).length === 0 ? `
+                    <div class="pdf-block" style="padding: 6px 24px; background: #fff;">
+                        <div style="padding: 10px; border: 1px dashed #cbd5e1; border-radius: 8px; font-size: 12px; color: #64748b;">ไม่มีรายการความคิดเห็นเพิ่มเติม</div>
+                    </div>
+                ` : Object.values(groupedComments).map(grp => `
+                    <div class="pdf-block" style="padding: 5px 24px; background: #fff;">
+                        <div style="border: 1px solid #c7d2fe; background: #eef2ff; border-radius: 8px; padding: 10px 12px; font-size: 12.5px; line-height: 1.55;">
+                            <div style="font-weight: 700; color: #312e81; margin-bottom: 5px;">📌 จุดอภิปราย: ${grp.label}</div>
+                            ${grp.list.map(cm => {
+                                const tagTxt = (TAG_META[cm.tag] || TAG_META.suggestion).label;
+                                return `
+                                    <div style="background: #ffffff; border: 1px solid #e0e7ff; border-radius: 6px; padding: 7px 10px; margin-bottom: 5px;">
+                                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; margin-bottom: 2px;">
+                                            <span style="font-weight: 700; color: #1d4ed8;">${tagTxt}</span>
+                                            <span>โดย: <strong>${cm.author}</strong> (เห็นด้วย ${cm.votes || 0})</span>
+                                        </div>
+                                        <div style="color: #0f172a;">${cm.comment}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+
+            // รอฟอนต์และเรนเดอร์ทีละ .pdf-block ลงในหน้ากระดาษ A4 แนวตั้ง (210 x 297 mm)
+            await new Promise(r => setTimeout(r, 250));
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                const pageWidth = 210;
+                const pageHeight = 297;
+                const marginTop = 10;
+                const marginBottom = 14;
+                const usableHeight = pageHeight - marginTop - marginBottom;
+
+                let currentY = marginTop;
+                const blocks = sandbox.querySelectorAll('.pdf-block');
+
+                for (let i = 0; i < blocks.length; i++) {
+                    const block = blocks[i];
+                    const canvas = await html2canvas(block, {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff'
+                    });
+
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imgWidth = pageWidth;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                    // หากบล็อกนี้วางในหน้าปัจจุบันแล้วจะเกินขอบล่าง ให้ขึ้นหน้าใหม่ทันที (ป้องกันข้อความโดนตัดครึ่ง)
+                    if (currentY + imgHeight > marginTop + usableHeight && currentY > marginTop) {
+                        pdf.addPage();
+                        currentY = marginTop;
+                    }
+
+                    pdf.addImage(imgData, 'JPEG', 0, currentY, imgWidth, imgHeight);
+                    currentY += imgHeight;
+                }
+
+                // ใส่เลขหน้าและชื่อระบบที่ท้ายกระดาษทุกหน้า
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let p = 1; p <= totalPages; p++) {
+                    pdf.setPage(p);
+                    pdf.setFontSize(9);
+                    pdf.setTextColor(120, 130, 145);
+                    pdf.text(`KS study studios - ทีม PCT โรงพยาบาลคอนสาร | หน้า ${p} / ${totalPages}`, pageWidth / 2, pageHeight - 6, { align: 'center' });
+                }
+
+                currentPdfBlob = pdf.output('blob');
+                currentPdfFileName = `KS-Study-HN-${c.hn || 'Report'}.pdf`;
+
+                if (currentPdfBlobUrl) URL.revokeObjectURL(currentPdfBlobUrl);
+                currentPdfBlobUrl = URL.createObjectURL(currentPdfBlob);
+
+                document.getElementById('pdfPreviewIframe').src = currentPdfBlobUrl;
+                document.getElementById('pdfGeneratingLoader').classList.add('hidden');
+                document.getElementById('pdfPreviewBody').classList.remove('hidden');
+            } catch (err) {
+                console.error("PDF generation error:", err);
+                alert("เกิดข้อผิดพลาดในการสร้างไฟล์ PDF");
+                closePdfPreviewModal();
+            }
+        }
+
+        function closePdfPreviewModal() {
+            document.getElementById('pdfPreviewModal').classList.add('hidden');
+        }
+
+        function downloadGeneratedPDF() {
+            if (!currentPdfBlobUrl) return;
+            const a = document.createElement('a');
+            a.href = currentPdfBlobUrl;
+            a.download = currentPdfFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function shareGeneratedPDF() {
+            if (!currentPdfBlob) return;
+            const file = new File([currentPdfBlob], currentPdfFileName, { type: 'application/pdf' });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        title: `รายงานทบทวนเคส ${currentPdfFileName}`,
+                        text: 'เอกสารสรุปผลการศึกษาวิเคราะห์และอภิปรายกรณีศึกษาทางคลินิก (KS study studios)',
+                        files: [file]
+                    });
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        downloadGeneratedPDF();
+                    }
+                }
+            } else {
+                alert('เบราว์เซอร์นี้ไม่รองรับการแชร์ไฟล์โดยตรง ระบบจะดาวน์โหลดไฟล์ .PDF ให้ทันทีเพื่อนำไปส่งต่อครับ');
+                downloadGeneratedPDF();
+            }
         }
 
         function setMappingFilter(filter) {
@@ -1192,7 +1692,6 @@
                                 const categoryTag = grp.target_id.startsWith('tl-') ? 'TIMELINE' : (grp.target_id.startsWith('rca-') ? '6Ms RCA' : (grp.target_id.startsWith('act-') ? 'ACTION PLAN' : 'CASE INFO'));
                                 return `
                                     <div class="glass-card rounded-2xl p-4 space-y-3 border border-white">
-                                        <!-- Node Header -->
                                         <div class="flex justify-between items-start gap-2">
                                             <div class="flex items-start gap-2.5">
                                                 <div class="w-7 h-7 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs mt-0.5">
@@ -1211,7 +1710,6 @@
                                             </button>
                                         </div>
 
-                                        <!-- รายละเอียดต้นเรื่องครบถ้วน -->
                                         ${contextDetail ? `
                                             <div class="bg-slate-100/90 border border-slate-200/80 rounded-xl p-2.5 text-[11px] text-slate-700 leading-relaxed">
                                                 <span class="font-bold text-slate-800 mr-1"><i class="fa-solid fa-file-lines text-blue-500 mr-1"></i>รายละเอียดต้นเรื่อง:</span>
@@ -1219,7 +1717,6 @@
                                             </div>
                                         ` : ''}
 
-                                        <!-- Connected Comment Cards -->
                                         <div class="pl-3 border-l-2 border-cyan-400 space-y-2">
                                             ${grp.items.map(cm => {
                                                 const meta = TAG_META[cm.tag] || TAG_META.suggestion;
@@ -1331,13 +1828,16 @@
             } catch (e) { console.error(e); }
         }
 
-        async function saveDebateRCAData() {
+        async function saveDebateRCAData(silent = false) {
             if(!currentActiveCase) return;
             const btn = document.getElementById('btnSaveRCA');
-            btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังบันทึก...`;
+            if(btn) {
+                btn.disabled = true;
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>กำลังบันทึก...</span>`;
+            }
 
             const rcaObj = {
+                ...(currentActiveCase.rca_data || {}),
                 m1_person: document.getElementById('rca_m1').value,
                 m2_method: document.getElementById('rca_m2').value,
                 m3_machine: document.getElementById('rca_m3').value,
@@ -1362,19 +1862,20 @@
                     })
                 });
                 currentActiveCase.rca_data = rcaObj;
-                openFullpageDebate(currentActiveCase.case_id);
-                alert("บันทึกข้อมูลวิเคราะห์ 6Ms และ RCA เรียบร้อยแล้ว!");
+                if (!silent) {
+                    openFullpageDebate(currentActiveCase.case_id);
+                    alert("บันทึกข้อมูลวิเคราะห์ 6Ms และ RCA เรียบร้อยแล้ว!");
+                }
             } catch(e) {
-                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล RCA");
+                if (!silent) alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล RCA");
             } finally {
                 if(document.getElementById('btnSaveRCA')) {
                     document.getElementById('btnSaveRCA').disabled = false;
-                    document.getElementById('btnSaveRCA').innerHTML = `<i class="fa-solid fa-floppy-disk mr-1"></i> บันทึกข้อมูลวิเคราะห์ RCA & 6Ms`;
+                    document.getElementById('btnSaveRCA').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> <span>บันทึกร่าง RCA & 6Ms</span>`;
                 }
             }
         }
 
-        // ข้อ 1: กู้คืนข้อมูลเดิม (รวมทั้ง Timeline และวันเวลา) มาแสดงในฟอร์มแก้ไขครบถ้วน
         function openEditCase(caseId) {
             const c = allCases.find(item => String(item.case_id) === String(caseId));
             if(!c) return;
@@ -1396,7 +1897,6 @@
             document.getElementById('form_hn').value = c.hn;
             document.getElementById('form_an').value = c.an || '';
 
-            // Parse Admit & Discharge/Refer Datetime
             if (c.admit_datetime) {
                 document.getElementById('form_admit_date').value = parseThaiDateToISO(c.admit_datetime);
                 const tm = String(c.admit_datetime).match(/(\d{2}:\d{2})/);
@@ -1517,7 +2017,7 @@
         function openNewCaseModal() {
             document.getElementById('caseForm').reset();
             document.getElementById('form_case_id').value = '';
-            document.getElementById('form_module_type').value = selectedModule;
+            document.getElementById('form_module_type').value = (selectedModule === 'Refer') ? 'Refer' : 'Dead';
             updateOutcomeDateLabel();
             document.getElementById('timelineContainer').innerHTML = '';
             timelineCount = 0;
@@ -1587,7 +2087,10 @@
                 weaknesses: document.getElementById('form_weaknesses').value,
                 timelines: timelines,
                 rca_data: existingCase ? (existingCase.rca_data || {}) : {},
-                comments: existingCase ? (existingCase.comments || []) : []
+                comments: existingCase ? (existingCase.comments || []) : [],
+                debate_status: existingCase ? (existingCase.debate_status || 'Pending') : 'Pending',
+                confirmed_at: existingCase ? (existingCase.confirmed_at || '') : '',
+                confirmed_by: existingCase ? (existingCase.confirmed_by || '') : ''
             };
 
             try {
